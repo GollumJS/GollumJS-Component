@@ -1,0 +1,11 @@
+[
+	"src/Component.js",
+	"src/Component/AHierarchyTree.js",
+	"src/Component/Manager.js",
+	"src/Component/Element.js",
+	"src/Component/Preloader.js",
+	"src/config.js"
+]
+
+
+

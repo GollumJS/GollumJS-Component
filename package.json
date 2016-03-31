@@ -1,0 +1,28 @@
+{
+	"name": "gollumjs-component",
+	"description": "Add Component logic for GollumJS",
+	"version": "0.1.0",
+	"author": "Damien Duboeuf <smeagolworms4@gmail.com>",
+	"license": "GPLv2",
+	"engines": {
+		"node": ">= 0.10.0"
+	},
+	"files": [
+		"README.mb",
+		"LICENSE",
+		"bin/",
+		"build/",
+		"src/",
+		"tests/",
+		"includes.json",
+		"index.js"
+	],
+	"dependencies": {
+		"ajax": "^0.1.0",
+		"gollumjs": "^0.1.4"
+	},
+	"scripts": {
+		"clean": "rm -rf ./build/*;",
+		"build": "npm run clean; node bin/build.js;"
+	}
+}
