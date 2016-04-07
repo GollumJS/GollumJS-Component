@@ -485,10 +485,18 @@ GollumJS.NS(GollumJS.Component, function() {
 		},
 		
 		callAfterInjectOnElement: function (element) {
+
+			this.bindEvents(element);
+
 			element.afterInject();
 			for (var i in element.childs) {
 				this.callAfterInjectOnElement(element.childs[i]);
 			}
+		},
+
+		bindEvents: function (element) {
+			var events = element.on();
+			console.log ('events', events);
 		},
 
 		getManager: function () {
@@ -607,6 +615,13 @@ GollumJS.NS(GollumJS.Component, function() {
 		 * Can be override
 		 */
 		afterInject: function() {
+		},
+
+		/**
+		 * Can be Override
+		 */
+		on: function() {
+			return {};
 		}
 
 	});

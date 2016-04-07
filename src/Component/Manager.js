@@ -1,6 +1,7 @@
 GollumJS.NS(GollumJS.Component, function() {
 	
 	var Promise = GollumJS.Promise;
+	var Collection = GollumJS.Utils.Collection;
 		
 	this.Manager = new GollumJS.Class({
 		
@@ -45,10 +46,39 @@ GollumJS.NS(GollumJS.Component, function() {
 		},
 		
 		callAfterInjectOnElement: function (element) {
+
+			this.bindEvents(element);
+
 			element.afterInject();
 			for (var i in element.childs) {
 				this.callAfterInjectOnElement(element.childs[i]);
 			}
+		},
+
+		bindEvents: function (element) {
+			var events = element.on();
+			for (var selector in events) {
+				var actions   = events[selector][0];
+				var callbacks = events[selector][1];
+				actions   = Collection.isArray(actions)   ? actions   : [actions];
+				callbacks = Collection.isArray(callbacks) ? callbacks : [callbacks];
+
+				for (var i = 0; i < actions.length; i++) {
+					element.dom.on(actions, selector, function() {
+						(function(selector, actions, callbacks) {
+							try {
+								var el = element.dom.find(selector);
+
+							} catch(e) {
+								console.error(e);
+							}
+
+						})(selector, actions, callbacks);
+
+					});
+				}
+			}
+			console.log ('events', events);
 		},
 
 		getManager: function () {
@@ -68,7 +98,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			var domComponents = root.find('component:not(component component)');
 			var _this = this;
 			
-			return GollumJS.Utils.Collection.eachStep(domComponents, function (i, dom, step){
+			return Collection.eachStep(domComponents, function (i, dom, step){
 				
 				var el   = $(dom);
 				var id = el.attr('id');

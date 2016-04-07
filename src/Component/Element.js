@@ -70,6 +70,13 @@ GollumJS.NS(GollumJS.Component, function() {
 		 * Can be override
 		 */
 		afterInject: function() {
+		},
+
+		/**
+		 * Can be Override
+		 */
+		on: function() {
+			return {};
 		}
 
 	});
