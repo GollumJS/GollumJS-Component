@@ -441,6 +441,7 @@ GollumJS.NS(GollumJS, function() {
 GollumJS.NS(GollumJS.Component, function() {
 	
 	var Promise = GollumJS.Promise;
+	var Collection = GollumJS.Utils.Collection;
 		
 	this.Manager = new GollumJS.Class({
 		
@@ -496,6 +497,32 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		bindEvents: function (element) {
 			var events = element.on();
+			for (var selector in events) {
+				
+				var types     = events[selector][0];
+				var callbacks = events[selector][1];
+				types     = Collection.isArray(types)     ? types     : [actions];
+				callbacks = Collection.isArray(callbacks) ? callbacks : [callbacks];
+
+				for (var i = 0; i < types.length; i++) {
+					
+					(function(selector, type, callbacks) {
+						
+						element.dom.on(type, selector, function(e) {
+							try {
+								var el = element.dom.find(selector);
+								for (var j = 0; j < callbacks.length; j++) {
+									callbacks[j].call(_this, e, el, type, selector);
+								}
+
+							} catch(e) {
+								console.error(e);
+							}
+						});
+
+					})(selector, types[i], callbacks);
+				}
+			}
 			console.log ('events', events);
 		},
 
@@ -516,7 +543,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			var domComponents = root.find('component:not(component component)');
 			var _this = this;
 			
-			return GollumJS.Utils.Collection.eachStep(domComponents, function (i, dom, step){
+			return Collection.eachStep(domComponents, function (i, dom, step){
 				
 				var el   = $(dom);
 				var id = el.attr('id');

@@ -58,24 +58,29 @@ GollumJS.NS(GollumJS.Component, function() {
 		bindEvents: function (element) {
 			var events = element.on();
 			for (var selector in events) {
-				var actions   = events[selector][0];
+				
+				var types     = events[selector][0];
 				var callbacks = events[selector][1];
-				actions   = Collection.isArray(actions)   ? actions   : [actions];
+				types     = Collection.isArray(types)     ? types     : [actions];
 				callbacks = Collection.isArray(callbacks) ? callbacks : [callbacks];
 
-				for (var i = 0; i < actions.length; i++) {
-					element.dom.on(actions, selector, function() {
-						(function(selector, actions, callbacks) {
+				for (var i = 0; i < types.length; i++) {
+					
+					(function(selector, type, callbacks) {
+						
+						element.dom.on(type, selector, function(e) {
 							try {
 								var el = element.dom.find(selector);
+								for (var j = 0; j < callbacks.length; j++) {
+									callbacks[j].call(_this, e, el, type, selector);
+								}
 
 							} catch(e) {
 								console.error(e);
 							}
+						});
 
-						})(selector, actions, callbacks);
-
-					});
+					})(selector, types[i], callbacks);
 				}
 			}
 			console.log ('events', events);
