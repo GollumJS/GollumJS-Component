@@ -486,9 +486,9 @@ GollumJS.NS(GollumJS.Component, function() {
 		},
 		
 		callAfterInjectOnElement: function (element) {
-
+			
 			this.bindEvents(element);
-
+			
 			element.afterInject();
 			for (var i in element.childs) {
 				this.callAfterInjectOnElement(element.childs[i]);
@@ -497,12 +497,14 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		bindEvents: function (element) {
 			var events = element.on();
-			for (var selector in events) {
+			
+			for (var k = 0; k < events.length; k++) {
 				
-				var types     = events[selector][0];
-				var callbacks = events[selector][1];
-				types     = Collection.isArray(types)     ? types     : [actions];
-				callbacks = Collection.isArray(callbacks) ? callbacks : [callbacks];
+				var selector  = events[k][0];
+				var types     = events[k][1];
+				var callbacks = events[k][2];
+				types     = Array.isArray(types)     ? types     : [types];
+				callbacks = Array.isArray(callbacks) ? callbacks : [callbacks];
 
 				for (var i = 0; i < types.length; i++) {
 					
@@ -510,9 +512,8 @@ GollumJS.NS(GollumJS.Component, function() {
 						
 						element.dom.on(type, selector, function(e) {
 							try {
-								var el = element.dom.find(selector);
 								for (var j = 0; j < callbacks.length; j++) {
-									callbacks[j].call(_this, e, el, type, selector);
+									callbacks[j].call(element, e, $(this), type, selector);
 								}
 
 							} catch(e) {
@@ -523,7 +524,6 @@ GollumJS.NS(GollumJS.Component, function() {
 					})(selector, types[i], callbacks);
 				}
 			}
-			console.log ('events', events);
 		},
 
 		getManager: function () {
