@@ -59,7 +59,7 @@ GollumJS.NS(GollumJS, function() {
 							JSON: JSON
 						});
 						
-						var html = ejs.render(element.infos.tpl, options);
+						var html = ejs.render(element.infos.tpl, options).replace(new RegExp('>\\s+<', 'g'), '><');
 						var dom  = $.parseHTML(html);
 						var div  = $('<div>').append(dom);
 						
