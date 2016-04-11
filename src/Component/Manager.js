@@ -117,7 +117,10 @@ GollumJS.NS(GollumJS.Component, function() {
 					.then(function (element) {
 						step(element);
 					})
-					.catch(console.error)
+					.catch(function (e) {
+						console.error(e);
+						step();
+					})
 				;
 			});
 		},
