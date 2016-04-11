@@ -72,7 +72,7 @@ GollumJS.NS(GollumJS.Component, function() {
 					(function(selector, type, callbacks) {
 						
 						var source = fullSearch ? $(document) : element.dom;
-						source.on(type, selector, function(e) {
+						var callbacksExec = function(e) {
 							try {
 								for (var j = 0; j < callbacks.length; j++) {
 									callbacks[j].call(element, e, $(this), type, selector);
@@ -81,7 +81,8 @@ GollumJS.NS(GollumJS.Component, function() {
 							} catch(e) {
 								console.error(e);
 							}
-						});
+						};
+						source.on(type, selector, callbacksExec);
 
 					})(selector, types[i], callbacks);
 				}
