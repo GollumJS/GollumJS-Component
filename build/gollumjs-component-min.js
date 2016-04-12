@@ -79,12 +79,13 @@ GollumJS.NS(GollumJS, function() {
 						try {
 							element.infos   = infos;
 							element.beforeRender(function () {
-								render().
-									then(function () {
+								render()
+									.then(function () {
 										resolve(element);
 									})
+									.catch(reject)
 								;
-							});
+							}, reject);
 						} catch(e) {
 							reject(e);
 						}
@@ -633,7 +634,7 @@ GollumJS.NS(GollumJS.Component, function() {
 		/**
 		 * Can be override
 		 */
-		beforeRender: function (done) {
+		beforeRender: function (done, reject) {
 			done();
 		},
 		
