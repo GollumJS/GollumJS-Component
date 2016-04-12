@@ -87,7 +87,6 @@ GollumJS.NS(GollumJS, function() {
 							});
 						} catch(e) {
 							reject(e);
-							return null;
 						}
 					});
 

@@ -61,7 +61,7 @@ GollumJS.NS(GollumJS, function() {
 			
 			return this.getManager().match(div, this)
 				.then (function(elements) {
-					if (elements.length) {
+					if (elements.length && elements[0]) {
 						_this.inject(elements[0]);
 						return elements[0];
 					}
