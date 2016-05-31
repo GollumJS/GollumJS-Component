@@ -83,6 +83,7 @@ GollumJS.NS(GollumJS.Component, function() {
 		beforeRender: function (resolve, reject) {
 			resolve();
 		},
+		
 		/**
 		 * Can be override
 		 */

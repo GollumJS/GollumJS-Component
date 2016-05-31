@@ -43,6 +43,8 @@ GollumJS.NS(GollumJS, function() {
 						return Promise.resolve(null);
 					}
 					
+					// TODO Factoring into Renderer service
+					
 					var promise = new Promise(function (resolve, reject) {
 						try {
 							element.beforeRender(function () {
@@ -103,7 +105,6 @@ GollumJS.NS(GollumJS, function() {
 		 * @return {Promise}
 		 */
 		load: function() {
-			console.log('start load: ', this.src);
 			var _this = this;
 			if (this.loading) {
 				return new Promise(function (success, reject) {

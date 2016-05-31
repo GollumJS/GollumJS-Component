@@ -52,7 +52,6 @@ GollumJS.NS(GollumJS.Component, function() {
 					.catch(console.error)
 					.finally(step)
 				;
-				step();
 			});
 		},
 

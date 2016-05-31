@@ -93,6 +93,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			if (hash == window.location.hash) {
 				console.error('Error loading default action');
+				return;
 			}
 			this.replaceState(hash);
 			this.parseUrl();

@@ -20,10 +20,17 @@ GollumJS.NS(GollumJS.Component, function() {
 			};
 			
 			if (this._lock) {
-				this._lockedElements.push(element);
-			} else {
-				render();
+				return new Promise(function (resolve, reject) {
+					_this._lockedElements.push({
+						element: element,
+						resolve: resolve,
+						reject : reject
+					});
+				});
 			}
+
+			render();
+			return Promise.resolve(element);
 			
 		},
 
@@ -38,7 +45,12 @@ GollumJS.NS(GollumJS.Component, function() {
 		unlock: function () {
 			this._lock = false;
 			for (var i = 0; i < this._lockedElements.length; i++) {
-				this.render(this._lockedElements[i]);
+				waited = this._lockedElements[i];
+				try {
+					waited.resolve(this.render(waited.element));	
+				} catch (e) {
+					waited.reject(e);
+				}
 			}
 			this._lockedElements = [];
 		}
