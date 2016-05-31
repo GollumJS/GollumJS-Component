@@ -1,27 +1,25 @@
 [
+	"src/config.js",
 	"src/Component.js",
 	"src/Component/AHierarchyTree.js",
 	"src/Component/Manager.js",
 	"src/Component/Element.js",
-
-	"src/Component/Loader.js",
-	"src/Component/Loader/ALoader.js",
-	"src/Component/Loader/Style.js",
-	"src/Component/Loader/Js.js",
-	"src/Component/Loader/Tpl.js",
-
-	"src/Component/OptionsParser.js",
 	"src/Component/Renderer.js",
 	"src/Component/EventBinder.js",
 	"src/Component/Namer.js",
-
+	"src/Component/OptionsParser.js",
+	"src/Component/Loader.js",
+	"src/Component/Loader/ALoader.js",
+	"src/Component/Loader/Tpl.js",
+	"src/Component/Loader/Style.js",
+	"src/Component/Loader/Js.js",
+	"src/Component/Loader/Compiled.js",
+	"src/Component/PreloadTag.js",
 	"src/Component/AbstractTag.js",
 	"src/Component/ComponentTag.js",
 	"src/Component/ControllerTag.js",
 	"src/Component/ActionTag.js",
-	"web/components/core/controller/compiled.min.js",
-
-	"src/config.js"
+	"web/components/core/controller/compiled.min.js"
 ]
 
 

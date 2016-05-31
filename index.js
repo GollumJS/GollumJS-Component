@@ -1,3 +1,115 @@
+GollumJS.config = GollumJS.Utils.extend ({
+	
+	node: {
+		gollumjs_component_path: typeof __dirname !== 'undefined' ? __dirname : "" 
+	},
+
+	src: {
+		path: [ '%node.gollumjs_component_path%/index.js' ],
+		excludesPath: ["%node.gollumjs_component_path%/src"],
+	},
+	
+	className: {
+		component: {
+			manager       : 'GollumJS.Component.Manager',
+			loader        : 'GollumJS.Component.Loader',
+			tplLoader     : 'GollumJS.Component.Loader.Tpl',
+			styleLoader   : 'GollumJS.Component.Loader.Style',
+			jsLoader      : 'GollumJS.Component.Loader.Js',
+			compiledLoader: 'GollumJS.Component.Loader.Compiled',
+			renderer      : 'GollumJS.Component.Renderer',
+			eventBinder   : 'GollumJS.Component.EventBinder',
+			optionsParser : 'GollumJS.Component.OptionsParser',
+			namer         : 'GollumJS.Component.Namer',
+			sass          : 'Sass'
+		}
+	},
+	
+	services: {
+
+		sass: {
+			class: '%className.component.sass%'
+		},
+		
+		componentManager: {
+			class: '%className.component.manager%',
+			args: [
+				'@componentLoader',
+				'@componentRenderer',
+				'@componentEventBinder',
+				'@componentOptionsParser',
+				'@componentNamer'
+			]
+		},
+		
+		componentLoader: {
+			class: '%className.component.loader%',
+			args: [
+				'@componentLoaderTpl',
+				'@componentLoaderStyle',
+				'@componentLoaderJs',
+				'@componentLoaderCompiled'
+			]
+		},
+		
+		componentLoaderTpl: {
+			class: '%className.component.tplLoader%',
+			args: [
+				'@ajaxProxy'
+			]
+		},
+		
+		componentLoaderStyle: {
+			class: '%className.component.styleLoader%',
+			args: [
+				'@ajaxProxy',
+				'@sass'
+			]
+		},
+		
+		componentLoaderJs: {
+			class: '%className.component.jsLoader%',
+			args: [
+				'@ajaxProxy'
+			]
+		},
+
+		componentLoaderCompiled: {
+			class: '%className.component.compiledLoader%',
+			args: [
+				'@componentLoaderTpl',
+				'@componentLoaderStyle'
+			]
+		},
+		
+		componentPreloader: {
+			class: 'GollumJS.Component.Preloader',
+			args: [
+				'@componentManager'
+			]
+		},
+		
+		componentRenderer: {
+			class: '%className.component.renderer%'
+		},
+		
+		componentEventBinder: {
+			class: '%className.component.eventBinder%'
+		},
+		
+		componentOptionsParser: {
+			class: '%className.component.optionsParser%'
+		},
+		
+		componentNamer: {
+			class: '%className.component.namer%'
+		}
+		
+	}
+	
+}, GollumJS.config);
+
+
 GollumJS.NS(GollumJS, function() {
 	
 	var Promise = GollumJS.Promise;
@@ -497,6 +609,189 @@ GollumJS.NS(GollumJS.Component, function() {
 	
 	var Promise = GollumJS.Promise;
 	
+	this.Renderer = new GollumJS.Class({
+		
+		_lock: false,
+		_lockedElements: [],
+		
+		render: function(element) {
+			
+			var _this = this;
+			var render = function () {
+				var html = element.component.infos.template(element)
+						.replace(new RegExp('>\\s+<', 'g'), '><')
+					;
+				var inner = $.parseHTML(html);
+				_this.clean(element);
+				element.dom.append(inner);
+			};
+			
+			if (this._lock) {
+				return new Promise(function (resolve, reject) {
+					_this._lockedElements.push({
+						element: element,
+						resolve: resolve,
+						reject : reject
+					});
+				});
+			}
+
+			render();
+			return Promise.resolve(element);
+			
+		},
+
+		clean: function (element) {
+			element.dom.empty();
+		},
+
+		lock: function () {
+			this._lock = true;
+		},
+
+		unlock: function () {
+			this._lock = false;
+			for (var i = 0; i < this._lockedElements.length; i++) {
+				waited = this._lockedElements[i];
+				try {
+					waited.resolve(this.render(waited.element));	
+				} catch (e) {
+					waited.reject(e);
+				}
+			}
+			this._lockedElements = [];
+		}
+		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component, function() {
+
+	this.EventBinder = new GollumJS.Class({
+		
+		bindElement: function(element) {
+
+			var _this  = this;
+			var events = element.on();
+
+			for (var i = 0; i < events.length; i++) {
+
+				var selectors  = events[i][0];
+				var types      = events[i][1];
+				var callbacks  = events[i][2];
+				var fullSearch = events[i][3];
+
+				selectors = Array.isArray(selectors)  ? selectors : [selectors];
+				types     = Array.isArray(types)     ? types     : [types];
+				callbacks = Array.isArray(callbacks) ? callbacks : [callbacks];
+				
+				for (var j = 0; j < selectors.length; j++) {
+					for (var k = 0; k < selectors.length; k++) {
+						(function(selector, type, callbacks) {
+
+							var source = fullSearch ? $(document) : element.dom;
+							var callbacksExec = function(e) {
+								try {
+									for (var l = 0; l < callbacks.length; l++) {
+										try {
+											callbacks[l].call(element, e, $(this), type, selector);
+										} catch(e) {
+											console.error(e);
+										}
+									}
+								} catch(e) {
+									console.error(e);
+								}
+							};
+
+							source.on(type, selector, callbacksExec);
+
+						})(selectors[j], types[k], callbacks);
+					}
+				}
+
+			}
+		}
+		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component, function() {
+
+	this.Namer = new GollumJS.Class({
+		
+		Static: {
+			DEFAULT_INSTANCE_NAME: 'instance'
+		},
+
+		named: function(element) {
+
+			var name = element.dom[0].getName();
+
+			var isKeyword = GollumJS.Component.AHierarchyTree.isKeyword(element.name);
+
+			if (!name || isKeyword) {
+				if (isKeyword) {
+					console.warn('Can not use keyword \''+name+'\' for name a component instance. This component will be renamed.');
+				}
+				name = this.self.DEFAULT_INSTANCE_NAME + '_'+element.uniqId;
+			}
+
+			// while (this.childs[element.name]) {
+			// 	element.name += '_'+element.uniqId;
+			// }
+			// this.childs[element.name] = element;
+
+			return name;
+		}
+		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component, function() {
+	
+	this.OptionsParser = new GollumJS.Class({
+		
+		Static: {
+			PARAM_KEY_OPTION: 'opt-',
+			PARAM_NAME_OPTION_JSON: 'opts-json'
+		},
+		
+		parse: function(element) {
+			
+			var el      = element.dom[0];
+			var options = element.options ? element.options : {};
+			
+			var jsonOptionStr = element.dom.attr(this.self.PARAM_NAME_OPTION_JSON);
+			if (jsonOptionStr) {
+				try {
+					options = JSON.parse(jsonOptionStr)
+				} catch (e) {
+					console.error(e);
+				}
+			}
+			
+			for (var i = 0; i < el.attributes.length; i++) {
+				var n = el.attributes[i].name;
+				if (n.substr(0, this.self.PARAM_KEY_OPTION.length) == this.self.PARAM_KEY_OPTION) {
+					options[n.substr(this.self.PARAM_KEY_OPTION.length)] = el.attributes[i].value;
+				}
+			}
+			
+			return options;
+		}
+		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component, function() {
+	
+	var Promise = GollumJS.Promise;
+	
 	this.Loader = new GollumJS.Class({
 
 		/**
@@ -579,6 +874,53 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 			return 'components/'+controller+'/'+action+'/';
 		}
 		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component.Loader, function() {
+	
+	var JSON = JSON3;
+	
+	this.Tpl = new GollumJS.Class({
+		
+		Extends: GollumJS.Component.Loader.ALoader,
+		
+		load: function(component) {
+			var base   = this.getBaseUrl(component);
+			var action = component.getActionName();
+			return this.ajaxProxy.request({
+				url: base+action+'.ejs'
+			})
+				.then(this.parseInfos.bind(this))
+			;
+		},
+
+		parseInfos: function(tpl) {
+			var json = {};
+			var match = tpl.match(/<%{[\s\S]+}%>/);
+			if (match) {
+				var data = match[0].substr(match[0].indexOf('{'));
+				data = data.substr(0, data.lastIndexOf('}')+1);
+				try {
+					json = JSON.parse(data);
+					if (json) {
+						tpl = tpl.substr(match[0].length);
+					}
+				} catch (e) {
+					console.error(e);
+				}
+			}
+			
+			var template = ejs.compile(tpl, 'utf8');
+			return GollumJS.Utils.extend({
+				template: template,
+				'class' : null,
+				js      : null,
+				css     : null,
+			}, json);
+		}
+
 	});
 
 });
@@ -737,231 +1079,144 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 });
 
 GollumJS.NS(GollumJS.Component.Loader, function() {
+
+	var PRomsie = GollumJS.Promise;
+
+	this.Compiled = new GollumJS.Class({
+
+		/**
+		 * @var {GollumJS.Component.Loader.Tpl}
+		 */
+		loaderTpl: null,
+
+		/**
+		 * @var {GollumJS.Component.Loader.Style}
+		 */
+		loaderStyle: null,
+
+		initialize: function (loaderTpl, loaderStyle) {
+			this.loaderTpl   = loaderTpl;
+			this.loaderStyle = loaderStyle;
+		},
+
+		parseJson: function(component, compiledJson) {
+			this.loading = true;
+
+			for (var f in compiledJson.css) {
+				this.loaderStyle.injectStyle(f, compiledJson.css[f]);
+			}
+			for (var f in compiledJson.js) {
+				var script = $('<script type="text/javascript" data-src="'+f+'" >'+"\n/* "+f+" */\n\n"+compiledJson.js[f]+'</script>');
+				script.appendTo(document.body);
+			}
+			component.infos = this.loaderTpl.parseInfos(compiledJson.ejs);
+
+			console.log('Load compiled component:: ', component);
+			
+			return Promise.resolve(compiledJson);
+		}
+
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component, function() {
 	
-	var JSON = JSON3;
+	var Collection = GollumJS.Utils.Collection;
 	
-	this.Tpl = new GollumJS.Class({
+	this.PreloadTag = new GollumJS.Class({
+
+		Extends: HTMLElement,
 		
-		Extends: GollumJS.Component.Loader.ALoader,
-		
-		load: function(component) {
-			var base   = this.getBaseUrl(component);
-			var action = component.getActionName();
-			return this.ajaxProxy.request({
-				url: base+action+'.ejs'
-			})
-				.then(this.parseInfos.bind(this))
+		Static: {
+			tag: 'gjs-preload-component',
+			HTMLElement: null,
+
+			onContextReady: function () {
+			},
+
+			onClassCreated: function () {
+				var _this = this;
+				GollumJS.Component.Manager.instance()
+					.then(function (manager) {
+						_this.HTMLElement = document.registerElement(
+							_this.tag, _this
+						);
+					})
+				;
+			}
+		},
+
+		getComponentsSrc: function() {
+			var content = this.innerHTML;
+			return content.match(/[a-zA-Z0-9]+:[a-zA-Z0-9]+/g);
+		},
+
+		_getComponent: function(src) {
+			return GollumJS.Component.Manager.instance()
+				.then(function (manager) {
+					return manager.getComponent(src);
+				})
 			;
 		},
 
-		parseInfos: function(tpl) {
-			var json = {};
-			var match = tpl.match(/<%{[\s\S]+}%>/);
-			if (match) {
-				var data = match[0].substr(match[0].indexOf('{'));
-				data = data.substr(0, data.lastIndexOf('}')+1);
-				try {
-					json = JSON.parse(data);
-					if (json) {
-						tpl = tpl.substr(match[0].length);
-					}
-				} catch (e) {
-					console.error(e);
-				}
-			}
-			
-			var template = ejs.compile(tpl, 'utf8');
-			return GollumJS.Utils.extend({
-				template: template,
-				'class' : null,
-				js      : null,
-				css     : null,
-			}, json);
-		}
-
-	});
-
-});
-
-GollumJS.NS(GollumJS.Component, function() {
-	
-	this.OptionsParser = new GollumJS.Class({
-		
-		Static: {
-			PARAM_KEY_OPTION: 'opt-',
-			PARAM_NAME_OPTION_JSON: 'opts-json'
-		},
-		
-		parse: function(element) {
-			
-			var el      = element.dom[0];
-			var options = element.options ? element.options : {};
-			
-			var jsonOptionStr = element.dom.attr(this.self.PARAM_NAME_OPTION_JSON);
-			if (jsonOptionStr) {
-				try {
-					options = JSON.parse(jsonOptionStr)
-				} catch (e) {
-					console.error(e);
-				}
-			}
-			
-			for (var i = 0; i < el.attributes.length; i++) {
-				var n = el.attributes[i].name;
-				if (n.substr(0, this.self.PARAM_KEY_OPTION.length) == this.self.PARAM_KEY_OPTION) {
-					options[n.substr(this.self.PARAM_KEY_OPTION.length)] = el.attributes[i].value;
-				}
-			}
-			
-			return options;
-		}
-		
-	});
-
-});
-
-GollumJS.NS(GollumJS.Component, function() {
-	
-	var Promise = GollumJS.Promise;
-	
-	this.Renderer = new GollumJS.Class({
-		
-		_lock: false,
-		_lockedElements: [],
-		
-		render: function(element) {
+		loadComponents: function () {
 			
 			var _this = this;
-			var render = function () {
-				var html = element.component.infos.template(element)
-						.replace(new RegExp('>\\s+<', 'g'), '><')
-					;
-				var inner = $.parseHTML(html);
-				_this.clean(element);
-				element.dom.append(inner);
-			};
+			var srcs = this.getComponentsSrc();
 			
-			if (this._lock) {
-				return new Promise(function (resolve, reject) {
-					_this._lockedElements.push({
-						element: element,
-						resolve: resolve,
-						reject : reject
-					});
+			return Collection.eachStep(srcs, function (i, src, step) {
+				console.log ('Preloading component started:', src);
+				_this._getComponent(src)
+					.then(function(component) {
+						return component.load()
+					})
+					.catch(console.error)
+					.finally(step)
+				;
+			});
+		},
+
+		_lockRenderer: function() {
+			GollumJS.Component.Manager.instance()
+				.then(function (manager) {
+					return manager.renderer.lock();
+				})
+				.catch(console.error)
+			;
+		},
+
+		_unlockRenderer: function() {
+			GollumJS.Component.Manager.instance()
+				.then(function (manager) {
+					return manager.renderer.unlock();
+				})
+				.catch(console.error)
+			;
+		},
+
+		createdCallback: function() {
+		},
+		
+		attachedCallback: function() {
+			var _this = this;
+			setTimeout(function () {
+				$(_this).remove();
+			}, 100);
+			
+			this._lockRenderer();
+			this.loadComponents()
+				.catch(console.error)
+				.finally(function () {
+					console.log ('End preloading');
+					_this._unlockRenderer();
 				});
-			}
-
-			render();
-			return Promise.resolve(element);
-			
+			;
 		},
-
-		clean: function (element) {
-			element.dom.empty();
-		},
-
-		lock: function () {
-			this._lock = true;
-		},
-
-		unlock: function () {
-			this._lock = false;
-			for (var i = 0; i < this._lockedElements.length; i++) {
-				waited = this._lockedElements[i];
-				try {
-					waited.resolve(this.render(waited.element));	
-				} catch (e) {
-					waited.reject(e);
-				}
-			}
-			this._lockedElements = [];
+		
+		detachedCallback: function() {
 		}
-		
-	});
 
-});
-
-GollumJS.NS(GollumJS.Component, function() {
-
-	this.EventBinder = new GollumJS.Class({
-		
-		bindElement: function(element) {
-
-			var _this  = this;
-			var events = element.on();
-
-			for (var i = 0; i < events.length; i++) {
-
-				var selectors  = events[i][0];
-				var types      = events[i][1];
-				var callbacks  = events[i][2];
-				var fullSearch = events[i][3];
-
-				selectors = Array.isArray(selectors)  ? selectors : [selectors];
-				types     = Array.isArray(types)     ? types     : [types];
-				callbacks = Array.isArray(callbacks) ? callbacks : [callbacks];
-				
-				for (var j = 0; j < selectors.length; j++) {
-					for (var k = 0; k < selectors.length; k++) {
-						(function(selector, type, callbacks) {
-
-							var source = fullSearch ? $(document) : element.dom;
-							var callbacksExec = function(e) {
-								try {
-									for (var l = 0; l < callbacks.length; l++) {
-										try {
-											callbacks[l].call(element, e, $(this), type, selector);
-										} catch(e) {
-											console.error(e);
-										}
-									}
-								} catch(e) {
-									console.error(e);
-								}
-							};
-
-							source.on(type, selector, callbacksExec);
-
-						})(selectors[j], types[k], callbacks);
-					}
-				}
-
-			}
-		}
-		
-	});
-
-});
-
-GollumJS.NS(GollumJS.Component, function() {
-
-	this.Namer = new GollumJS.Class({
-		
-		Static: {
-			DEFAULT_INSTANCE_NAME: 'instance'
-		},
-
-		named: function(element) {
-
-			var name = element.dom[0].getName();
-
-			var isKeyword = GollumJS.Component.AHierarchyTree.isKeyword(element.name);
-
-			if (!name || isKeyword) {
-				if (isKeyword) {
-					console.warn('Can not use keyword \''+name+'\' for name a component instance. This component will be renamed.');
-				}
-				name = this.self.DEFAULT_INSTANCE_NAME + '_'+element.uniqId;
-			}
-
-			// while (this.childs[element.name]) {
-			// 	element.name += '_'+element.uniqId;
-			// }
-			// this.childs[element.name] = element;
-
-			return name;
-		}
-		
 	});
 
 });
@@ -1148,116 +1403,4 @@ GollumJS.NS(GollumJS.Component, function() {
 });
 
 GollumJS.Component.Manager.instance().then(function(m){m.registerCompiled({"src":"core:controller","ejs":"<%{\n\t\"js\": [\n\t\t\"Controller.js\",\n\t\t\"AbstractAction.js\"\n\t],\n\t\"class\": \"GollumJS.Component.Controller\"\n}%>\n<div class=\"gjs-controller\" ></div>","js":{"Controller.js":"GollumJS.NS(GollumJS.Component,function(){GollumJS.Component;this.Controller=new GollumJS.Class({Extends:GollumJS.Component.Element,actions:null,_popstate:!0,_rootLoaded:!1,beforeRender:function(t){var o=this.getManager().getComponent(\"action:\"+this.getHome());o.load().then(t)[\"catch\"](console.error)},getHome:function(){return this.dom[0].getHome()},onAttached:function(){var t=this,o=this.getCurrentHash();o||(o=this.getHome().root),this.replaceState(\"#\"),this.pushState(\"#\"+o),$(window).on({popstate:function(){if(t._popstate){var o=GollumJS.get(\"engine\"),e=t.getCurrentHash();\"\"==e&&(t._rootLoaded&&o.close(),t.pushState(\"#\"+t.getHome())),t.parseUrl()}}}),this.parseUrl()},getCurrentHash:function(){var t=window.location.hash;return t&&\"#\"==t[0]&&(t=t.substr(1)),t},parseUrl:function(){var t=this,o=this.getCurrentHash();if(o==this.getHome()&&(this._rootLoaded=!0),o){console.log(\"Open action:\",o);var e=URI(o).path(!0),n=URI(o).query(!0);this.open(e,n)[\"catch\"](function(){console.warn(\"Error loading action:\",o),t.openDefault()})}else this.openDefault()},openDefault:function(){var t=\"#\"+this.getHome();return t==window.location.hash?void console.error(\"Error loading default action\"):(this.replaceState(t),void this.parseUrl())},replaceState:function(t){history.replaceState(null,null,t)},pushState:function(t){history.pushState(null,null,t)},open:function(t){var o=this,e=t.split(\"/\"),n=e.shift();this.setLoading(!0),this.action&&this.action.remove();var a=this.getManager().getComponent(\"action:\"+n);return a.load().then(function(){var t=$('<gjs-action action=\"'+n+'\" ></gjs-action>');o.dom.find(\"> div.gjs-controller\").append(t)})},setLoading:function(t){t?this.dom.addClass(\"loading\"):this.dom.removeClass(\"loading\")},_bindEventLayer:function(t){var o=this;t.dom.find('a[type=\"back\"]').click(function(t){var e=this.href?this.href:o.options.root;if(e&&\"#\"==e[0]&&(e=e.substr(1)),e){if(t.preventDefault(),o._popstate=!1,history.length>1){history.back();var n=o.getCurrentHash();\"\"==n&&o.pushState(e),console.log(\"simple back\")}o.replaceState(e),o.parseUrl(),o._popstate=!0}})}})});","AbstractAction.js":"GollumJS.NS(GollumJS.Component,function(){this.Layer=new GollumJS.Class({Extends:GollumJS.Component.Element,getRequest:function(){var t={dest:URI(window.location.href).path(!0),query:URI(window.location.href).query(!0)},n=window.location.hash;return n&&\"#\"==n[0]&&(n=n.substr(1)),n&&(t.path=n.split(\"/\"),t.action=t.path.shift()),t},getUri:function(){var t=this.getRequest(),n=t.path?\"/\"+t.path.join(\"/\"):\"\";return this.name+n}})});"},"css":{}})});
-
-GollumJS.config = GollumJS.Utils.extend ({
-	
-	node: {
-		gollumjs_component_path: typeof __dirname !== 'undefined' ? __dirname : "" 
-	},
-
-	src: {
-		path: [ '%node.gollumjs_component_path%/index.js' ],
-		excludesPath: ["%node.gollumjs_component_path%/src"],
-	},
-	
-	className: {
-		component: {
-			manager       : 'GollumJS.Component.Manager',
-			loader        : 'GollumJS.Component.Loader',
-			tplLoader     : 'GollumJS.Component.Loader.Tpl',
-			styleLoader   : 'GollumJS.Component.Loader.Style',
-			jsLoader      : 'GollumJS.Component.Loader.Js',
-			compiledLoader: 'GollumJS.Component.Loader.Compiled',
-			renderer      : 'GollumJS.Component.Renderer',
-			eventBinder   : 'GollumJS.Component.EventBinder',
-			optionsParser : 'GollumJS.Component.OptionsParser',
-			namer         : 'GollumJS.Component.Namer',
-			sass          : 'Sass'
-		}
-	},
-	
-	services: {
-
-		sass: {
-			class: '%className.component.sass%'
-		},
-		
-		componentManager: {
-			class: '%className.component.manager%',
-			args: [
-				'@componentLoader',
-				'@componentRenderer',
-				'@componentEventBinder',
-				'@componentOptionsParser',
-				'@componentNamer'
-			]
-		},
-		
-		componentLoader: {
-			class: '%className.component.loader%',
-			args: [
-				'@componentLoaderTpl',
-				'@componentLoaderStyle',
-				'@componentLoaderJs',
-				'@componentLoaderCompiled'
-			]
-		},
-		
-		componentLoaderTpl: {
-			class: '%className.component.tplLoader%',
-			args: [
-				'@ajaxProxy'
-			]
-		},
-		
-		componentLoaderStyle: {
-			class: '%className.component.styleLoader%',
-			args: [
-				'@ajaxProxy',
-				'@sass'
-			]
-		},
-		
-		componentLoaderJs: {
-			class: '%className.component.jsLoader%',
-			args: [
-				'@ajaxProxy'
-			]
-		},
-
-		componentLoaderCompiled: {
-			class: '%className.component.compiledLoader%',
-			args: [
-				'@componentLoaderTpl',
-				'@componentLoaderStyle'
-			]
-		},
-		
-		componentPreloader: {
-			class: 'GollumJS.Component.Preloader',
-			args: [
-				'@componentManager'
-			]
-		},
-		
-		componentRenderer: {
-			class: '%className.component.renderer%'
-		},
-		
-		componentEventBinder: {
-			class: '%className.component.eventBinder%'
-		},
-		
-		componentOptionsParser: {
-			class: '%className.component.optionsParser%'
-		},
-		
-		componentNamer: {
-			class: '%className.component.namer%'
-		}
-		
-	}
-	
-}, GollumJS.config);
-
 

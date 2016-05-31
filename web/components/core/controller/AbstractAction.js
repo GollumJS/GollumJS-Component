@@ -1,6 +1,6 @@
 GollumJS.NS(GollumJS.Component, function() {
 		
-	this.Layer = new GollumJS.Class({
+	this.AbstractAction = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Element,
 		

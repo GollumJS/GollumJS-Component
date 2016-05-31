@@ -4,12 +4,12 @@
 		<meta charset="UTF-8" />
 	</head>
 	<body>
-
-		<gjs-preload-component src="main:hello" ><!--
+		
+		<gjs-preload-component><!--
 			main:hello
 			main:preload
 		--></gjs-preload-component>
-
+		
  		<gjs-component name="style" src="main:style" ></gjs-component>
 		
 		<gjs-component name="hello1" src="main:hello" ></gjs-component>
@@ -23,7 +23,7 @@
 		<gjs-controller home="my-action" >
 			Loading
 		</gjs-controller>
-
+		
 		<script src="../node_modules/webcomponents.js/CustomElements.js" ></script>
 		<script src="../node_modules/gollumjs/node_modules/rsvp/dist/rsvp.js" ></script>
 		<script src="../node_modules/jquery/dist/jquery.js" ></script>
@@ -34,7 +34,7 @@
 
 		<script src="../node_modules/gollumjs/build/gollumjs.js" ></script>
 		<script src="../node_modules/gollumjs-ajax/build/gollumjs-ajax.js" ></script>
-
+		
 		<script src="../src/config.js"></script>
 		<script src="../src/Component.js"></script>
 		<script src="../src/Component/AHierarchyTree.js"></script>
