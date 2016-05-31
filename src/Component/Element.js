@@ -4,47 +4,71 @@ GollumJS.NS(GollumJS.Component, function() {
 	
 	this.Element = new GollumJS.Class({
 		
-		Extends: GollumJS.AHierarchyTree,
+		Extends: GollumJS.Component.AHierarchyTree,
 
-		name: null,
-		uniqId: null,
 		component: null,
-		infos: null,
-		options: null,
-		_parentElement: null,
+		uniqId   : null,
+		name     : null,
+		options  : null,
+		rendered : false,
 		
-		initialize: function (component, parentElement, data) {
+		initialize: function (component, dom) {
 			this.component = component;
+			this.dom       = dom;
 			this.uniqId    = ++componentIndex;
-			this.name      = data.name    || null;
-			this.options   = data.options || null;
+			this.name      = this.getManager().namer.named(this);
+			this.options   = this.getManager().optionsParser.parse(this);
 			
-			this._parentElement = parentElement;
-			if (this._parentElement) {
-				this._parentElement.addChild(this);
-			} else {
-				this._parentElement = this.getManager();
-				this.getManager().addChild(this);
-			}
-
 			this.init();
 		},
-
-		getApp: function () {
-			return this.component.manager.app;
-		},
-
+		
+		/**
+		 * @return GollumJS.Component.Manager
+		 */
 		getManager: function () {
 			return this.component.manager;
 		},
-
+		
+		/**
+		 * @return GollumJS.Component.Element
+		 */
 		getParentElement: function () {
-			return this._parentElement;
+			
+			var manager = this.getManager();
+			var selector = 'body, '+manager.htmlTags.join(', ');
+			
+			var search = function(el) {
+				if (!el.length) {
+					return null;
+				}
+				var p = el.parent(selector);
+				if (p.length) {
+					return p;
+				}
+				return search(el.parent());
+			};
+			
+			var p = search(this.dom);
+			
+			if (!p || !p.length) {
+				return null;
+			}
+			if (p[0] == document.body) {
+				return this.getManager();
+			}
+			
+			return p[0].GJSElement ? p[0].GJSElement : null;
+		},
+		
+		/**
+		 * @return string
+		 */
+		content: function () {
+			return this.dom[0].originalContent;
 		},
 		
 		remove: function () {
 			this.dom.remove();
-			delete(this.getParentElement().childs[this.name]);
 		},
 		
 		/**
@@ -56,10 +80,9 @@ GollumJS.NS(GollumJS.Component, function() {
 		/**
 		 * Can be override
 		 */
-		beforeRender: function (done, reject) {
-			done();
+		beforeRender: function (resolve, reject) {
+			resolve();
 		},
-		
 		/**
 		 * Can be override
 		 */
@@ -67,9 +90,15 @@ GollumJS.NS(GollumJS.Component, function() {
 		},
 		
 		/**
-		 * Can be override
+		 * Can be attached
 		 */
-		afterInject: function() {
+		onAttached: function() {
+		},
+		
+		/**
+		 * Can be detached
+		 */
+		onDetached: function() {
 		},
 
 		/**

@@ -1,0 +1,5 @@
+@include gjs-component("main:preload") {
+	> div {
+		background: yellow;
+	}
+}

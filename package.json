@@ -1,28 +1,40 @@
 {
-	"name": "gollumjs-component",
-	"description": "Add Component logic for GollumJS",
-	"version": "0.1.0",
-	"author": "Damien Duboeuf <smeagolworms4@gmail.com>",
-	"license": "GPLv2",
-	"engines": {
-		"node": ">= 0.10.0"
-	},
-	"files": [
-		"README.mb",
-		"LICENSE",
-		"bin/",
-		"build/",
-		"src/",
-		"tests/",
-		"includes.json",
-		"index.js"
-	],
-	"dependencies": {
-		"gollumjs-ajax": "^0.1.0",
-		"gollumjs": "^0.1.4"
-	},
-	"scripts": {
-		"clean": "rm -rf ./build/*;",
-		"build": "npm run clean; node bin/build.js;"
-	}
+  "name": "gollumjs-component",
+  "description": "It's a component manager based on GollumJS Framework.",
+  "version": "0.2.0",
+  "author": "Damien Duboeuf <smeagolworms4@gmail.com>",
+  "license": "GPLv2",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "files": [
+    "README.mb",
+    "LICENSE",
+    "bin/",
+    "build/",
+    "src/",
+    "tests/",
+    "exemple/",
+    "web/",
+    "include.json",
+    "index.js"
+  ],
+  "dependencies": {
+    "gollumjs-ajax": "^0.2.0",
+    "gollumjs": "^0.2.0",
+    "ejs": "^2.4.1",
+    "jquery": "^2.2.3",
+    "json3": "^3.3.2",
+    "sass.js": "^0.9.10",
+    "urijs": "^1.18.0",
+    "webcomponents.js": "^0.7.22"
+  },
+  "devDependencies": {
+    "uglifycss": "0.0.20",
+    "uglifyjs": "^2.4.10"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build/*;",
+    "build": "npm run clean; node bin/build.js;"
+  }
 }

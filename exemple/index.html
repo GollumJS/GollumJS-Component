@@ -1,0 +1,70 @@
+<html lang="fr" >
+	<head>
+		<title>Picross</title>
+		<meta charset="UTF-8" />
+	</head>
+	<body>
+
+		<gjs-preload-component src="main:hello" ><!--
+			main:hello
+			main:preload
+		--></gjs-preload-component>
+
+ 		<gjs-component name="style" src="main:style" ></gjs-component>
+		
+		<gjs-component name="hello1" src="main:hello" ></gjs-component>
+		<gjs-component name="hello2" src="main:hello" opt-value="Damien" ></gjs-component>
+		<gjs-component name="parent" src="main:parent" ></gjs-component> 
+		<gjs-component name="content" src="main:content" >
+			<h2>Hello content</h2>
+			<gjs-component name="hello1" src="main:hello" opt-value="Content Child" ></gjs-component>
+		</gjs-component>
+		
+		<gjs-controller home="my-action" >
+			Loading
+		</gjs-controller>
+
+		<script src="../node_modules/webcomponents.js/CustomElements.js" ></script>
+		<script src="../node_modules/rsvp/dist/rsvp.js" ></script>
+		<script src="../node_modules/jquery/dist/jquery.js" ></script>
+		<script src="../node_modules/json3/lib/json3.js" ></script>
+		<script src="../node_modules/sass.js/dist/sass.js" ></script>
+		<script src="../node_modules/ejs/ejs.js" ></script>
+		<script src="../node_modules/urijs/src/URI.js" ></script>
+
+		<script src="../node_modules/gollumjs/build/gollumjs.js" ></script>
+		<script src="../node_modules/gollumjs-ajax/build/gollumjs-ajax.js" ></script>
+
+		<script src="../src/config.js"></script>
+		<script src="../src/Component.js"></script>
+		<script src="../src/Component/AHierarchyTree.js"></script>
+		<script src="../src/Component/Manager.js"></script>
+		<script src="../src/Component/Element.js"></script>
+		<script src="../src/Component/Renderer.js"></script>
+		<script src="../src/Component/EventBinder.js"></script>
+		<script src="../src/Component/Namer.js"></script>
+		<script src="../src/Component/OptionsParser.js"></script>
+		<script src="../src/Component/Loader.js"></script>
+		<script src="../src/Component/Loader/ALoader.js"></script>
+		<script src="../src/Component/Loader/Tpl.js"></script>
+		<script src="../src/Component/Loader/Style.js"></script>
+		<script src="../src/Component/Loader/Js.js"></script>
+		<script src="../src/Component/Loader/Compiled.js"></script>
+		<script src="../src/Component/PreloadTag.js"></script>
+		<script src="../src/Component/AbstractTag.js"></script>
+		<script src="../src/Component/ComponentTag.js"></script>
+		<script src="../src/Component/ControllerTag.js"></script>
+		<script src="../src/Component/ActionTag.js"></script>
+		<script src="../web/components/core/controller/compiled.min.js"></script>
+
+		<script src="js/App.js"></script>
+		
+		<script type="text/javascript" >
+		//<!--
+			GollumJS.Utils.addDOMEvent(window, 'load', function() {
+				var app = new App ();
+			});
+		//-->
+		</script>
+	</body>
+</html>

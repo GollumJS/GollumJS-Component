@@ -1,0 +1,8 @@
+@include gjs-component("main:parent") {
+	@include gjs-component("main:hello") {
+		h1 {
+			background: yellow;
+		}
+	}
+
+}

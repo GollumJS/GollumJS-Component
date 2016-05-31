@@ -1,92 +1,92 @@
 GollumJS.NS(GollumJS.Component, function() {
 	
-	var Promise = GollumJS.Promise;
-	var Collection = GollumJS.Utils.Collection;
-		
+	var Promise       = GollumJS.Promise;
+	var instance      = null;
+	var startResolves = [];
+	
 	this.Manager = new GollumJS.Class({
 		
-		Extends: GollumJS.AHierarchyTree,
-
+		Extends: GollumJS.Component.AHierarchyTree,
+		
 		Static: {
-			DEFAULT_INSTANCE_NAME: 'instance'
+			instance: function () {
+				if (instance) {
+					return Promise.resolve(instance);
+				}
+				return new Promise(function(resolve, reject) {
+					startResolves.push(resolve);
+				});
+			}
 		},
-
+		
 		components: {},
-		sass: null,
-				
+		htmlTags: [],
+		
 		/**
-		 * @var GollumJS.Ajax.Proxy
+		 * @var GollumJS.Component.Loader
 		 */
-		ajaxProxy: null,
-
-		initialize: function (ajaxProxy) {
-			
-			this.ajaxProxy = ajaxProxy;
-			this.sass      = new Sass();
-			this.dom       = $(document.body);
+		loader: null,
+		
+		/**
+		 * @var GollumJS.Component.Renderer
+		 */
+		renderer: null,
+		
+		/**
+		 * @var GollumJS.Component.EventBinder
+		 */
+		eventBinder: null,
+		
+		/**
+		 * @var GollumJS.Component.OptionsParser
+		 */
+		optionsParser: null,
+		
+		/**
+		 * @var GollumJS.Component.Namer
+		 */
+		namer: null,
+		
+		initialize: function (loader, renderer, eventBinder, optionsParser, namer) {
+			this.loader        = loader;
+			this.renderer      = renderer;
+			this.eventBinder   = eventBinder;
+			this.optionsParser = optionsParser;
+			this.namer         = namer;
 		},
 		
 		start: function () {
+			if (instance) {
+				throw new GollumJS.Exception('Component manager already started.');
+			}
 			
-			var _this = this;
-			var prelaoder = GollumJS.get('componentPreloader');
+			console.log('Start component manager');
 			
-			return prelaoder.load()
-				.then ( function() {
-					return _this.match();
-				})
-				.then (function(elements) {
-					for (var i = 0; i < elements.length; i++ ) {
-						_this.callAfterInjectOnElement(elements[i]);
-					}
-					return elements;
-				})
-				.catch (console.error)
-			;
+			this.dom = $(document.body);
+			instance = this;
+
+			for (var i = 0; i < startResolves.length; i++) {
+				startResolves[i](this);
+			}
+			delete startResolves;
+			$(window).trigger('gjs-component-start', this);
 		},
 		
-		callAfterInjectOnElement: function (element) {
-			
-			this.bindEvents(element);
-			
-			element.afterInject();
-			for (var i in element.childs) {
-				this.callAfterInjectOnElement(element.childs[i]);
+		registerHtmlTag: function(htmlTag) {
+			this.htmlTags.push(htmlTag);
+		},
+		
+		getComponent: function (src) {
+			if (!this.components[src]) {
+				 this.components[src] = new GollumJS.Component(src, this);
 			}
+			return this.components[src];
 		},
 
-		bindEvents: function (element) {
-			var events = element.on();
+		registerCompiled: function (json) {
+			var component = this.getComponent(json.src);
+			component.loadCompiled(json);
 			
-			for (var k = 0; k < events.length; k++) {
-				
-				var selector   = events[k][0];
-				var types      = events[k][1];
-				var callbacks  = events[k][2];
-				var fullSearch = events[k][3];
-				types     = Array.isArray(types)     ? types     : [types];
-				callbacks = Array.isArray(callbacks) ? callbacks : [callbacks];
-
-				for (var i = 0; i < types.length; i++) {
-					
-					(function(selector, type, callbacks) {
-						
-						var source = fullSearch ? $(document) : element.dom;
-						var callbacksExec = function(e) {
-							try {
-								for (var j = 0; j < callbacks.length; j++) {
-									callbacks[j].call(element, e, $(this), type, selector);
-								}
-
-							} catch(e) {
-								console.error(e);
-							}
-						};
-						source.on(type, selector, callbacksExec);
-
-					})(selector, types[i], callbacks);
-				}
-			}
 		},
 
 		getManager: function () {
@@ -95,41 +95,6 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		getParentElement: function () {
 			return this;
-		},
-
-		match: function (root, parent) {
-			root = root || $(document);
-			parent = parent || null;
-			if (GollumJS.Component.Manager.isInstance(parent)) {
-				parent = null;
-			}
-			var domComponents = root.find('component:not(component component)');
-			var _this = this;
-			
-			return Collection.eachStep(domComponents, function (i, dom, step){
-				
-				var el   = $(dom);
-				var id = el.attr('id');
-
-				var component = _this.getComponent(id);
-				
-				component.display(el, parent)
-					.then(function (element) {
-						step(element);
-					})
-					.catch(function (e) {
-						console.error(e);
-						step();
-					})
-				;
-			});
-		},
-
-		getComponent: function (id) {
-			if (!this.components[id]) {
-				 this.components[id] = new GollumJS.Component(id, this);
-			}
-			return this.components[id];
 		}
 
 	});
