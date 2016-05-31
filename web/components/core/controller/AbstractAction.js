@@ -4,6 +4,8 @@ GollumJS.NS(GollumJS.Component, function() {
 		
 		Extends: GollumJS.Component.Element,
 		
+		layerManager: null,
+		
 		getRequest: function() {
 			var request = {
 				dest : URI(window.location.href).path(true),

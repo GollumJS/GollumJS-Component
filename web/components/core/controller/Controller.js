@@ -125,7 +125,13 @@ GollumJS.NS(GollumJS.Component, function() {
 
 					_this.dom.bind('gjs-render', function (e, element) {
 						if (element === gjsAction[0].GJSElement) {
-							console.log('Action:', element);
+
+							_this.action = element;
+							element.layerManager = _this;
+							
+							_this.setLoading(false);
+							
+							element.dom.find('> div').addClass('action');
 						}
 					});
 					
