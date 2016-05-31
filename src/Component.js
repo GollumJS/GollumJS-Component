@@ -59,7 +59,7 @@ GollumJS.NS(GollumJS, function() {
 						.then(function () {
 							element.afterRender();
 							element.rendered = true;
-							element.dom.trigger( 'gjs-render', element);
+							element.dom.trigger( 'gjs-render', [ element ]);
 							return element;
 						});
 					;

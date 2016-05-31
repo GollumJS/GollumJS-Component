@@ -7,7 +7,7 @@ GollumJS.NS(GollumJS.Component, function() {
 		Extends: GollumJS.Component.Element,
 		
 		actions: null,
-		_popstate : true,
+		_popState : true,
 		_rootLoaded: false,
 		
 		beforeRender: function (done, reject) {
@@ -36,7 +36,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 			$(window).on({
 				'popstate': function(event) {
-					if (_this._popstate) {
+					if (_this._popState) {
 
 						var engine = GollumJS.get('engine');
 						var hash = _this.getCurrentHash();
@@ -122,6 +122,13 @@ GollumJS.NS(GollumJS.Component, function() {
 			return component.load()
 				.then(function () {
 					var gjsAction = $('<gjs-action action="'+name+'" ></gjs-action>');
+
+					_this.dom.bind('gjs-render', function (e, element) {
+						if (element === gjsAction[0].GJSElement) {
+							console.log('Action:', element);
+						}
+					});
+					
 					_this.dom.find('> div.gjs-controller').append(gjsAction);
 				})
 			;
@@ -175,7 +182,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				if (href) {
 
 					e.preventDefault();
-					_this._popstate = false;
+					_this._popState = false;
 					if (history.length > 1) {
 						history.back();
 						var hash = _this.getCurrentHash();
@@ -188,7 +195,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 					_this.replaceState(href);
 					_this.parseUrl();
-					_this._popstate = true;
+					_this._popState = true;
 				}
 			});
 		}

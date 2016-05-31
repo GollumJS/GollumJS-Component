@@ -69,7 +69,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				startResolves[i](this);
 			}
 			delete startResolves;
-			$(window).trigger('gjs-component-start', this);
+			$(window).trigger('gjs-component-start', [ this ]);
 		},
 		
 		registerHtmlTag: function(htmlTag) {

@@ -171,7 +171,7 @@ GollumJS.NS(GollumJS, function() {
 						.then(function () {
 							element.afterRender();
 							element.rendered = true;
-							element.dom.trigger( 'gjs-render', element);
+							element.dom.trigger( 'gjs-render', [ element ]);
 							return element;
 						});
 					;
@@ -458,7 +458,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				startResolves[i](this);
 			}
 			delete startResolves;
-			$(window).trigger('gjs-component-start', this);
+			$(window).trigger('gjs-component-start', [ this ]);
 		},
 		
 		registerHtmlTag: function(htmlTag) {
@@ -1273,7 +1273,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				}
 				manager.eventBinder.bindElement(element);
 				element.onAttached();
-				element.dom.trigger('gjs-attach', element);
+				element.dom.trigger('gjs-attach', [ element ]);
 			})
 		;
 	};
@@ -1284,7 +1284,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		if (element && element.rendered) {
 			manager.renderer.clean(element);
-			element.dom.trigger('gjs-detach', element);
+			element.dom.trigger('gjs-detach', [ element ]);
 		}
 	};
 	
@@ -1402,5 +1402,5 @@ GollumJS.NS(GollumJS.Component, function() {
 
 });
 
-GollumJS.Component.Manager.instance().then(function(m){m.registerCompiled({"src":"core:controller","ejs":"<%{\n\t\"js\": [\n\t\t\"Controller.js\",\n\t\t\"AbstractAction.js\"\n\t],\n\t\"class\": \"GollumJS.Component.Controller\"\n}%>\n<div class=\"gjs-controller\" ></div>","js":{"Controller.js":"GollumJS.NS(GollumJS.Component,function(){GollumJS.Component;this.Controller=new GollumJS.Class({Extends:GollumJS.Component.Element,actions:null,_popstate:!0,_rootLoaded:!1,beforeRender:function(t){var o=this.getManager().getComponent(\"action:\"+this.getHome());o.load().then(t)[\"catch\"](console.error)},getHome:function(){return this.dom[0].getHome()},onAttached:function(){var t=this,o=this.getCurrentHash();o||(o=this.getHome().root),this.replaceState(\"#\"),this.pushState(\"#\"+o),$(window).on({popstate:function(){if(t._popstate){var o=GollumJS.get(\"engine\"),e=t.getCurrentHash();\"\"==e&&(t._rootLoaded&&o.close(),t.pushState(\"#\"+t.getHome())),t.parseUrl()}}}),this.parseUrl()},getCurrentHash:function(){var t=window.location.hash;return t&&\"#\"==t[0]&&(t=t.substr(1)),t},parseUrl:function(){var t=this,o=this.getCurrentHash();if(o==this.getHome()&&(this._rootLoaded=!0),o){console.log(\"Open action:\",o);var e=URI(o).path(!0),n=URI(o).query(!0);this.open(e,n)[\"catch\"](function(){console.warn(\"Error loading action:\",o),t.openDefault()})}else this.openDefault()},openDefault:function(){var t=\"#\"+this.getHome();return t==window.location.hash?void console.error(\"Error loading default action\"):(this.replaceState(t),void this.parseUrl())},replaceState:function(t){history.replaceState(null,null,t)},pushState:function(t){history.pushState(null,null,t)},open:function(t){var o=this,e=t.split(\"/\"),n=e.shift();this.setLoading(!0),this.action&&this.action.remove();var a=this.getManager().getComponent(\"action:\"+n);return a.load().then(function(){var t=$('<gjs-action action=\"'+n+'\" ></gjs-action>');o.dom.find(\"> div.gjs-controller\").append(t)})},setLoading:function(t){t?this.dom.addClass(\"loading\"):this.dom.removeClass(\"loading\")},_bindEventLayer:function(t){var o=this;t.dom.find('a[type=\"back\"]').click(function(t){var e=this.href?this.href:o.options.root;if(e&&\"#\"==e[0]&&(e=e.substr(1)),e){if(t.preventDefault(),o._popstate=!1,history.length>1){history.back();var n=o.getCurrentHash();\"\"==n&&o.pushState(e),console.log(\"simple back\")}o.replaceState(e),o.parseUrl(),o._popstate=!0}})}})});","AbstractAction.js":"GollumJS.NS(GollumJS.Component,function(){this.AbstractAction=new GollumJS.Class({Extends:GollumJS.Component.Element,getRequest:function(){var t={dest:URI(window.location.href).path(!0),query:URI(window.location.href).query(!0)},n=window.location.hash;return n&&\"#\"==n[0]&&(n=n.substr(1)),n&&(t.path=n.split(\"/\"),t.action=t.path.shift()),t},getUri:function(){var t=this.getRequest(),n=t.path?\"/\"+t.path.join(\"/\"):\"\";return this.name+n}})});"},"css":{}})});
+GollumJS.Component.Manager.instance().then(function(m){m.registerCompiled({"src":"core:controller","ejs":"<%{\n\t\"js\": [\n\t\t\"Controller.js\",\n\t\t\"AbstractAction.js\"\n\t],\n\t\"class\": \"GollumJS.Component.Controller\"\n}%>\n<div class=\"gjs-controller\" ></div>","js":{"Controller.js":"GollumJS.NS(GollumJS.Component,function(){GollumJS.Component;this.Controller=new GollumJS.Class({Extends:GollumJS.Component.Element,actions:null,_popState:!0,_rootLoaded:!1,beforeRender:function(t){var o=this.getManager().getComponent(\"action:\"+this.getHome());o.load().then(t)[\"catch\"](console.error)},getHome:function(){return this.dom[0].getHome()},onAttached:function(){var t=this,o=this.getCurrentHash();o||(o=this.getHome().root),this.replaceState(\"#\"),this.pushState(\"#\"+o),$(window).on({popstate:function(){if(t._popState){var o=GollumJS.get(\"engine\"),e=t.getCurrentHash();\"\"==e&&(t._rootLoaded&&o.close(),t.pushState(\"#\"+t.getHome())),t.parseUrl()}}}),this.parseUrl()},getCurrentHash:function(){var t=window.location.hash;return t&&\"#\"==t[0]&&(t=t.substr(1)),t},parseUrl:function(){var t=this,o=this.getCurrentHash();if(o==this.getHome()&&(this._rootLoaded=!0),o){console.log(\"Open action:\",o);var e=URI(o).path(!0),n=URI(o).query(!0);this.open(e,n)[\"catch\"](function(){console.warn(\"Error loading action:\",o),t.openDefault()})}else this.openDefault()},openDefault:function(){var t=\"#\"+this.getHome();return t==window.location.hash?void console.error(\"Error loading default action\"):(this.replaceState(t),void this.parseUrl())},replaceState:function(t){history.replaceState(null,null,t)},pushState:function(t){history.pushState(null,null,t)},open:function(t){var o=this,e=t.split(\"/\"),n=e.shift();this.setLoading(!0),this.action&&this.action.remove();var a=this.getManager().getComponent(\"action:\"+n);return a.load().then(function(){var t=$('<gjs-action action=\"'+n+'\" ></gjs-action>');o.dom.bind(\"gjs-render\",function(o,e){e===t[0].GJSElement&&console.log(\"Action:\",e)}),o.dom.find(\"> div.gjs-controller\").append(t)})},setLoading:function(t){t?this.dom.addClass(\"loading\"):this.dom.removeClass(\"loading\")},_bindEventLayer:function(t){var o=this;t.dom.find('a[type=\"back\"]').click(function(t){var e=this.href?this.href:o.options.root;if(e&&\"#\"==e[0]&&(e=e.substr(1)),e){if(t.preventDefault(),o._popState=!1,history.length>1){history.back();var n=o.getCurrentHash();\"\"==n&&o.pushState(e),console.log(\"simple back\")}o.replaceState(e),o.parseUrl(),o._popState=!0}})}})});","AbstractAction.js":"GollumJS.NS(GollumJS.Component,function(){this.AbstractAction=new GollumJS.Class({Extends:GollumJS.Component.Element,getRequest:function(){var t={dest:URI(window.location.href).path(!0),query:URI(window.location.href).query(!0)},n=window.location.hash;return n&&\"#\"==n[0]&&(n=n.substr(1)),n&&(t.path=n.split(\"/\"),t.action=t.path.shift()),t},getUri:function(){var t=this.getRequest(),n=t.path?\"/\"+t.path.join(\"/\"):\"\";return this.name+n}})});"},"css":{}})});
 
