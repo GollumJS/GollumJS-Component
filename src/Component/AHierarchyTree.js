@@ -20,7 +20,6 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		dom: null,
 		
-		// TODO FIXME
 		find: function (path) {
 
 			var split = path.split('.');

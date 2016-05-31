@@ -10,9 +10,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 			var name = element.dom[0].getName();
 
-			// TODO Not implemented
-			//var isKeyword = GollumJS.Component.isKeyword(element.name);
-			var isKeyword = false;
+			var isKeyword = GollumJS.Component.AHierarchyTree.isKeyword(element.name);
 
 			if (!name || isKeyword) {
 				if (isKeyword) {
