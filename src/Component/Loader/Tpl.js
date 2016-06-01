@@ -18,7 +18,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 
 		parseInfos: function(tpl) {
 			var json = {};
-			var match = tpl.match(/<%{[\s\S]+}%>/);
+			var match = tpl.match(/<{[\s\S]+}>/);
 			if (match) {
 				var data = match[0].substr(match[0].indexOf('{'));
 				data = data.substr(0, data.lastIndexOf('}')+1);
