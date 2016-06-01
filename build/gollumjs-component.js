@@ -1149,7 +1149,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		getComponentsSrc: function() {
 			var content = this.innerHTML;
-			return content.match(/[a-zA-Z0-9]+:[a-zA-Z0-9]+/g);
+			return content.match(/[-a-zA-Z0-9-]+:[-a-zA-Z0-9]+/g);
 		},
 
 		_getComponent: function(src) {
