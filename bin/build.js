@@ -61,7 +61,7 @@ var pack = function () {
 		if (error !== null) {
 			console.error('exec error: ' + error);
 		}
-		console.log('=== End pack GollumJSCompoent ===');
+		console.log('=== End pack GollumJSComponent ===');
 		build();
 	});
 };
