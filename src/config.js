@@ -26,10 +26,6 @@ GollumJS.config = GollumJS.Utils.extend ({
 	},
 	
 	services: {
-
-		sass: {
-			class: '%className.component.sass%'
-		},
 		
 		componentManager: {
 			class: '%className.component.manager%',
@@ -63,7 +59,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 			class: '%className.component.styleLoader%',
 			args: [
 				'@ajaxProxy',
-				'@sass'
+				'%className.component.sass%',
 			]
 		},
 		

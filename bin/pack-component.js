@@ -65,39 +65,39 @@ var writeCompiledJS = function (path, compiled, cb) {
 fs.readdir(pathComponent, function (err, controllers) {
 	controllers.forEach(function (controller) {
 		try {
-
+			
 			if (err) {
 				console.error (err);
 				return;
 			}
-
+			
 			var controllerPath = pathComponent+'/'+controller;
 			var sates          = fs.statSync(controllerPath);
-
+			
 			if (sates.isDirectory()) {
-
+				
 				console.log ('  Controller found:', controller);
-
+				
 				fs.readdir(controllerPath, function (err, actions) {
 					actions.forEach(function (action) {
-	
+						
 						if (err) {
 							console.error (err);
 							return;
 						}
-	
+						
 						var actionPath = controllerPath+'/'+action;
 						var sates	  = fs.statSync(actionPath);
-	
+						
 						if (sates.isDirectory()) {
-	
+							
 							var ejsPath = actionPath+'/'+action+'.ejs';
 							if (fs.existsSync(ejsPath)) {
 								sates = fs.statSync(ejsPath);
-	
+								
 								if (sates.isFile()) {
 									console.log ('    Action found:', action);
-	
+									
 									var compiled = {
 										src: controller + ':' + action,
 										ejs: fs.readFileSync(ejsPath, "utf8"),
@@ -105,9 +105,9 @@ fs.readdir(pathComponent, function (err, controllers) {
 										css: {}
 									};
 									var json = tplLoader.parseInfos(compiled.ejs);
-	
+									
 									// JS
-	
+									
 									var filesJS = json.js;
 									if (filesJS) {
 										if (typeof filesJS == 'string') {
@@ -118,26 +118,26 @@ fs.readdir(pathComponent, function (err, controllers) {
 											compiled.js[fileJS] = fs.readFileSync(actionPath+'/'+fileJS, "utf8");
 										}
 									}
-	
+									
 									// CSS
-	
+									
 									var filesCSS = json.css;
 									if (filesCSS) {
-	
+										
 										if (typeof filesCSS == 'string') {
 											filesCSS = [filesCSS];
 										}
-	
+										
 										for (var i = 0; i < filesCSS.length; i++) {
 											var fileCSS = filesCSS[i];
 											var css = fs.readFileSync(actionPath+'/'+fileCSS, "utf8");
 											compiled.css[fileCSS] = css;
 										}
-	
+										
 									}
-	
+									
 									GollumJS.Utils.Collection.eachStep(compiled.css, function (file, content, step) {
-	
+										
 										content = styleLoader.coreMixin() + content;
 										sass.compile(content, function(result) {
 											try {
@@ -154,39 +154,38 @@ fs.readdir(pathComponent, function (err, controllers) {
 										});
 									})
 										.then(function () {
-	
+											
 											writeCompiledJS(actionPath + '/compiled.js', compiled);
-	
+											
 											for (var f in compiled.css) {
 												compiled.css[f] = uglifycss.processString(
 													compiled.css[f],
 													{ maxLineLen: 500, expandVars: true }
 												);
 											}
-	
+											
 											for (var f in compiled.js) {
 												compiled.js[f] = uglifyjs.minify(
 													compiled.js[f],
 													{ fromString: true }
 												).code;
 											}
-	
+											
 											writeCompiledJS(actionPath + '/compiled.min.js', compiled);
-	
-	
+											
 										})
 										.catch(console.error)
 									;
-	
+									
 								}
 							}
 	
 						}
 					});
 				});
-
+				
 			}
-
+			
 		} catch (e) {
 			console.error(e);
 		}

@@ -6,11 +6,20 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		
 		Extends: GollumJS.Component.Loader.ALoader,
 
-		sass: null,
+		sassClassName: null,
+		_sass: null,
 		
-		initialize: function (ajaxProxy, sass) {
+		initialize: function (ajaxProxy, sassClassName) {
 			this.parent()(ajaxProxy);
-			this.sass = sass;
+			this.sassClassName = sassClassName;
+		},
+		
+		getSass: function () {
+			if (!this._sass) {
+				var clazz = GollumJS.Reflection.ReflectionClass.getClassByName(this.sassClassName);
+				this._sass = new clazz();
+			}
+			return this._sass;	
 		},
 		
 		coreMixin: function() {
@@ -50,7 +59,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 							
 							content = _this.coreMixin() + content;
 							
-							_this.sass.compile(content, function(result) {
+							_this.getSass().compile(content, function(result) {
 								
 								try {
 									if (result.status) {

@@ -26,10 +26,6 @@ GollumJS.config = GollumJS.Utils.extend ({
 	},
 	
 	services: {
-
-		sass: {
-			class: '%className.component.sass%'
-		},
 		
 		componentManager: {
 			class: '%className.component.manager%',
@@ -63,7 +59,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 			class: '%className.component.styleLoader%',
 			args: [
 				'@ajaxProxy',
-				'@sass'
+				'%className.component.sass%',
 			]
 		},
 		
@@ -836,6 +832,15 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			var _this = this;
 			
+			if (!GollumJS.config.debug) {
+				return this.loaderCompiled.load(component)
+					.then(function() {
+						console.log('Load min component:', component);
+						return component;
+					})
+				;
+			} 
+			
 			return this.loaderTpl.load(component)
 				.then(function(json) {
 					return _this.loaderStyle.load(component, json);
@@ -933,11 +938,20 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		
 		Extends: GollumJS.Component.Loader.ALoader,
 
-		sass: null,
+		sassClassName: null,
+		_sass: null,
 		
-		initialize: function (ajaxProxy, sass) {
+		initialize: function (ajaxProxy, sassClassName) {
 			this.parent()(ajaxProxy);
-			this.sass = sass;
+			this.sassClassName = sassClassName;
+		},
+		
+		getSass: function () {
+			if (!this._sass) {
+				var clazz = GollumJS.Reflection.ReflectionClass.getClassByName(this.sassClassName);
+				this._sass = new clazz();
+			}
+			return this._sass;	
 		},
 		
 		coreMixin: function() {
@@ -977,7 +991,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 							
 							content = _this.coreMixin() + content;
 							
-							_this.sass.compile(content, function(result) {
+							_this.getSass().compile(content, function(result) {
 								
 								try {
 									if (result.status) {
@@ -1030,7 +1044,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Js = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
-				
+		
 		/**
 		 * Load component
 		 */
@@ -1059,6 +1073,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 							script.onload = function(){
 								step();
 							};
+							script.onerror = function(e){
+								reject(e);
+							};
 							script.src = _this.getBaseUrl(component)+file;
 							document.getElementsByTagName('body')[0].appendChild(script);
 					// 	})
@@ -1080,9 +1097,11 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 
 GollumJS.NS(GollumJS.Component.Loader, function() {
 
-	var PRomsie = GollumJS.Promise;
+	var Promsie = GollumJS.Promise;
 
 	this.Compiled = new GollumJS.Class({
+
+		Extends: GollumJS.Component.Loader.ALoader,
 
 		/**
 		 * @var {GollumJS.Component.Loader.Tpl}
@@ -1097,6 +1116,26 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		initialize: function (loaderTpl, loaderStyle) {
 			this.loaderTpl   = loaderTpl;
 			this.loaderStyle = loaderStyle;
+		},
+
+		/**
+		 * Load component
+		 */
+		load: function(component) {
+			var _this = this;
+			return new Promsie(function (resolve, reject) {
+				var script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.async = true;
+				script.onload = function(){
+					resolve(component);
+				};
+				script.onerror = function(e){
+					reject(e);
+				};
+				script.src = _this.getBaseUrl(component)+'compiled.min.js';
+				document.getElementsByTagName('body')[0].appendChild(script);
+			});
 		},
 
 		parseJson: function(component, compiledJson) {

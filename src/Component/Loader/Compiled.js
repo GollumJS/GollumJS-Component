@@ -1,8 +1,10 @@
 GollumJS.NS(GollumJS.Component.Loader, function() {
 
-	var PRomsie = GollumJS.Promise;
+	var Promsie = GollumJS.Promise;
 
 	this.Compiled = new GollumJS.Class({
+
+		Extends: GollumJS.Component.Loader.ALoader,
 
 		/**
 		 * @var {GollumJS.Component.Loader.Tpl}
@@ -17,6 +19,26 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		initialize: function (loaderTpl, loaderStyle) {
 			this.loaderTpl   = loaderTpl;
 			this.loaderStyle = loaderStyle;
+		},
+
+		/**
+		 * Load component
+		 */
+		load: function(component) {
+			var _this = this;
+			return new Promsie(function (resolve, reject) {
+				var script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.async = true;
+				script.onload = function(){
+					resolve(component);
+				};
+				script.onerror = function(e){
+					reject(e);
+				};
+				script.src = _this.getBaseUrl(component)+'compiled.min.js';
+				document.getElementsByTagName('body')[0].appendChild(script);
+			});
 		},
 
 		parseJson: function(component, compiledJson) {

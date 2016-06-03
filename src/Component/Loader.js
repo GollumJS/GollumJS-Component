@@ -46,6 +46,15 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			var _this = this;
 			
+			if (!GollumJS.config.debug) {
+				return this.loaderCompiled.load(component)
+					.then(function() {
+						console.log('Load min component:', component);
+						return component;
+					})
+				;
+			} 
+			
 			return this.loaderTpl.load(component)
 				.then(function(json) {
 					return _this.loaderStyle.load(component, json);

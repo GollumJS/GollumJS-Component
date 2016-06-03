@@ -6,7 +6,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Js = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
-				
+		
 		/**
 		 * Load component
 		 */
@@ -34,6 +34,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 							script.async = true;
 							script.onload = function(){
 								step();
+							};
+							script.onerror = function(e){
+								reject(e);
 							};
 							script.src = _this.getBaseUrl(component)+file;
 							document.getElementsByTagName('body')[0].appendChild(script);
