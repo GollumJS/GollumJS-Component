@@ -2,10 +2,12 @@ App.ComponentElement = App.ComponentElement || {};
 App.ComponentElement.Main = App.ComponentElement.Main || {};
 
 GollumJS.NS(App.ComponentElement.Main, function() {
-		
+	
+	
+	
 	this.Hello = new GollumJS.Class({
 		
-		Extends: GollumJS.Component.Element,
+		Extends: GollumJS.Component.AbstractAction,
 		
 		options: {
 			value: 'World'
