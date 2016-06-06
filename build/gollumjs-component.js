@@ -22,7 +22,9 @@ GollumJS.config = GollumJS.Utils.extend ({
 			eventBinder   : 'GollumJS.Component.EventBinder',
 			optionsParser : 'GollumJS.Component.OptionsParser',
 			namer         : 'GollumJS.Component.Namer',
-			sass          : 'Sass'
+			sass          : 'Sass',
+			
+			styleLoaderIncludeCore: 'GollumJS.Component.Loader.Style.IncludeCore'
 		}
 	},
 	
@@ -56,12 +58,22 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'@ajaxProxy'
 			]
 		},
-		
+
 		componentLoaderStyle: {
 			class: '%className.component.styleLoader%',
 			args: [
 				'@ajaxProxy',
 				'%className.component.sass%',
+			],
+			'inject': {
+				'addInclude': 'component.style.include'
+			}
+		},
+		
+		componentLoaderStyleIncludeCore: {
+			class: '%className.component.styleLoaderIncludeCore%',
+			tags: [
+				{ 'name': 'component.style.include' }
 			]
 		},
 
@@ -306,11 +318,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			KEYWORD_ROOT: '_root',
 
 			isKeyword: function (str) {
-				return
-					str == this.KEYWORD_TARGET ||
-					str == this.KEYWORD_PARENT ||
-					str == this.KEYWORD_ROOT
-				;
+				return str == this.KEYWORD_TARGET || str == this.KEYWORD_PARENT || str == this.KEYWORD_ROOT;
 			},
 		},
 
@@ -843,6 +851,9 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			if (!GollumJS.config.debug) {
 				return this.loaderCompiled.load(component)
+					.then(function(component) {
+						return _this.loaderImg.load(component, component.infos);
+					})
 					.then(function() {
 						console.log('Load min component:', component);
 						return component;
@@ -951,9 +962,14 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		Extends: GollumJS.Component.Loader.ALoader,
 		
 		/**
-		 * @var GollumJS.Ajax.Proxy
+		 * @var {GollumJS.Ajax.Proxy}
 		 */
 		ajaxProxy: null,
+		
+		/**
+		 * @var {[GollumJS.Component.Loader.Style.Include]}
+		 */
+		_includes: [],
 		
 		sassClassName: null,
 		_sass: null,
@@ -961,6 +977,11 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		initialize: function (ajaxProxy, sassClassName) {
 			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
+		},
+
+		addInclude: function (include) {
+			console.log (arguments);
+			this._includes.push(include);
 		},
 		
 		getSass: function () {
@@ -971,14 +992,12 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 			return this._sass;	
 		},
 		
-		coreMixin: function() {
-			return '' +
-				'@mixin gjs-component($src) {'     +"\n"+
-				'	gjs-component[src="#{$src}"] {'+"\n"+
-				'	   @content;'                  +"\n"+
-  				'	}'                             +"\n"+
-				'}'                                +"\n\n"
-			;
+		coreMixin: function(src) {
+			var content = '';
+			for (var i = 0; i < this._includes.length; i++) {
+				content += this._includes[i].getContent(src);
+			}
+			return content;
 		},
 		
 		load: function(component, json) {
@@ -1006,7 +1025,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 					})
 						.then(function (content) {
 							
-							content = _this.coreMixin() + content;
+							content = _this.coreMixin(component.src) + content;
 							
 							_this.getSass().compile(content, function(result) {
 								
@@ -1051,6 +1070,63 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 
 	});
 
+});
+
+GollumJS.NS(GollumJS.Component.Loader.Style, function() {
+    
+	this.Include = new GollumJS.Class({
+		
+		getContent: function (src) {
+			return '';
+		}
+		
+	});
+	
+});
+
+GollumJS.NS(GollumJS.Component.Loader.Style, function() {
+	
+	this.IncludeCore = new GollumJS.Class({
+		
+		Extends: GollumJS.Component.Loader.Style.Include,
+		
+		getContent: function (src) {
+			return '' +
+				'@function str-replace($string, $search, $replace: \'\') {'+"\n"+
+				'	$index: str-index($string, $search);'                  +"\n"+
+				'	@if $index {'                                          +"\n"+
+				'		@return '                                          +"\n"+
+				'			str-slice($string, 1, $index - 1) +'           +"\n"+
+				'			$replace + '                                   +"\n"+
+				'			str-replace(str-slice('                        +"\n"+
+				'				$string, $index + str-length($search)),'   +"\n"+
+				'				$search,'                                  +"\n"+
+				'				$replace'                                  +"\n"+
+				'			)'                                             +"\n"+
+				'		;'                                                 +"\n"+
+				'	}'                                                     +"\n"+
+				'	@return $string;'                                      +"\n"+
+				'}'                                                        +"\n\n"+
+
+				'@function gjs-component-path($component, $path: null) {'+"\n"+
+				'	@if $path == null {'                                 +"\n"+
+				'		$path: $component;'                              +"\n"+
+				'		$component: \''+src+'\';'                        +"\n"+
+				'	}'                                                   +"\n"+
+				'	$component: str-replace($component, \':\', \'/\');'   +"\n"+
+				'	@return \'components/\'+$component+\'/\'+$path;'     +"\n"+
+				'}'                                                      +"\n\n"+
+
+				'@mixin gjs-component($src) {'     +"\n"+
+				'	gjs-component[src="#{$src}"] {'+"\n"+
+				'	   @content;'                  +"\n"+
+				'	}'                             +"\n"+
+				'}'                                +"\n\n"
+			;
+		}
+		
+	});
+	
 });
 
 GollumJS.NS(GollumJS.Component.Loader, function() {
@@ -1515,5 +1591,5 @@ GollumJS.NS(GollumJS.Component, function() {
 
 });
 
-GollumJS.Component.Manager.instance().then(function(m){m.registerCompiled({"src":"core:controller","ejs":"<{\n\t\"js\": [\n\t\t\"Controller.js\",\n\t\t\"AbstractAction.js\"\n\t],\n\t\"class\": \"GollumJS.Component.Controller\"\n}>\n<div class=\"gjs-controller\" ></div>","js":{"Controller.js":"GollumJS.NS(GollumJS.Component,function(){GollumJS.Component;this.Controller=new GollumJS.Class({Extends:GollumJS.Component.Element,actions:null,_popState:!0,_rootLoaded:!1,beforeRender:function(t){var e=this.getManager().getComponent(\"action:\"+this.getHome());e.load().then(t)[\"catch\"](console.error)},getHome:function(){return this.dom[0].getHome()},onAttached:function(){var t=this,e=this.getCurrentHash();e||(e=this.getHome().root),this.replaceState(\"#\"),this.pushState(\"#\"+e),$(window).on({popstate:function(){if(t._popState){var e=GollumJS.get(\"engine\"),o=t.getCurrentHash();\"\"==o&&(t._rootLoaded&&e.close(),t.pushState(\"#\"+t.getHome())),t.parseUrl()}}}),this.parseUrl()},getCurrentHash:function(){var t=window.location.hash;return t&&\"#\"==t[0]&&(t=t.substr(1)),t},parseUrl:function(){var t=this,e=this.getCurrentHash();if(e==this.getHome()&&(this._rootLoaded=!0),e){console.log(\"Open action:\",e);var o=URI(e).path(!0),n=URI(e).query(!0);this.open(o,n)[\"catch\"](function(){console.warn(\"Error loading action:\",e),t.openDefault()})}else this.openDefault()},openDefault:function(){var t=\"#\"+this.getHome();return t==window.location.hash?void console.error(\"Error loading default action\"):(this.replaceState(t),void this.parseUrl())},replaceState:function(t){history.replaceState(null,null,t)},pushState:function(t){history.pushState(null,null,t)},open:function(t){var e=this,o=t.split(\"/\"),n=o.shift();this.setLoading(!0),this.action&&this.action.remove();var a=this.getManager().getComponent(\"action:\"+n);return a.load().then(function(){var t=$('<gjs-action action=\"'+n+'\" ></gjs-action>');e.dom.bind(\"gjs-render\",function(o,n){n===t[0].GJSElement&&(e.action=n,n.layerManager=e,e.setLoading(!1),n.dom.find(\"> div\").addClass(\"action\"))}),e.dom.find(\"> div.gjs-controller\").append(t)})},setLoading:function(t){t?this.dom.addClass(\"loading\"):this.dom.removeClass(\"loading\")},_bindEventLayer:function(t){var e=this;t.dom.find('a[type=\"back\"]').click(function(t){var o=this.href?this.href:e.options.root;if(o&&\"#\"==o[0]&&(o=o.substr(1)),o){if(t.preventDefault(),e._popState=!1,history.length>1){history.back();var n=e.getCurrentHash();\"\"==n&&e.pushState(o),console.log(\"simple back\")}e.replaceState(o),e.parseUrl(),e._popState=!0}})}})});","AbstractAction.js":"GollumJS.NS(GollumJS.Component,function(){this.AbstractAction=new GollumJS.Class({Extends:GollumJS.Component.Element,layerManager:null,getRequest:function(){var t={dest:URI(window.location.href).path(!0),query:URI(window.location.href).query(!0)},n=window.location.hash;return n&&\"#\"==n[0]&&(n=n.substr(1)),n&&(t.path=n.split(\"/\"),t.action=t.path.shift()),t},getUri:function(){var t=this.getRequest(),n=t.path?\"/\"+t.path.join(\"/\"):\"\";return this.name+n}})});"},"css":{}})});
+GollumJS.Component.Manager.instance().then(function(m){m.registerCompiled({"src":"core:controller","ejs":"<{\n\t\"js\": [\n\t\t\"Controller.js\",\n\t\t\"AbstractAction.js\"\n\t],\n\t\"class\": \"GollumJS.Component.Controller\"\n}>\n<div class=\"gjs-controller\" ></div>","js":{"Controller.js":"GollumJS.NS(GollumJS.Component,function(){GollumJS.Component;this.Controller=new GollumJS.Class({Extends:GollumJS.Component.Element,actions:null,_popState:!0,_rootLoaded:!1,beforeRender:function(t){var e=this.getManager().getComponent(\"action:\"+this.getHome());e.load().then(t)[\"catch\"](console.error)},getHome:function(){return this.dom[0].getHome()},onAttached:function(){var t=this,e=this.getCurrentHash();e||(e=this.getHome().root),this.replaceState(\"#\"),this.pushState(\"#\"+e),$(window).on({popstate:function(){if(t._popState){var e=GollumJS.get(\"engine\"),o=t.getCurrentHash();\"\"==o&&(t._rootLoaded&&e.close(),t.pushState(\"#\"+t.getHome())),t.parseUrl()}}}),this.parseUrl()},getCurrentHash:function(){var t=window.location.hash;return t&&\"#\"==t[0]&&(t=t.substr(1)),t},parseUrl:function(){var t=this,e=this.getCurrentHash();if(e==this.getHome()&&(this._rootLoaded=!0),e){console.log(\"Open action:\",e);var o=URI(e).path(!0),n=URI(e).query(!0);this.open(o,n)[\"catch\"](function(){console.warn(\"Error loading action:\",e),t.openDefault()})}else this.openDefault()},openDefault:function(){var t=\"#\"+this.getHome();return t==window.location.hash?void console.error(\"Error loading default action\"):(this.replaceState(t),void this.parseUrl())},replaceState:function(t){history.replaceState(null,null,t)},pushState:function(t){history.pushState(null,null,t)},open:function(t){var e=this,o=t.split(\"/\"),n=o.shift();this.setLoading(!0),this.action&&this.action.remove();var a=this.getManager().getComponent(\"action:\"+n);return a.load().then(function(){var t=$('<gjs-action action=\"'+n+'\" ></gjs-action>');e.dom.bind(\"gjs-render\",function(o,n){n===t[0].GJSElement&&(e.action=n,n.layerManager=e,e.setLoading(!1),n.dom.find(\"> div\").addClass(\"gjs-action\"))}),e.dom.find(\"> div.gjs-controller\").append(t)})},setLoading:function(t){t?this.dom.addClass(\"loading\"):this.dom.removeClass(\"loading\")},_bindEventLayer:function(t){var e=this;t.dom.find('a[type=\"back\"]').click(function(t){var o=this.href?this.href:e.options.root;if(o&&\"#\"==o[0]&&(o=o.substr(1)),o){if(t.preventDefault(),e._popState=!1,history.length>1){history.back();var n=e.getCurrentHash();\"\"==n&&e.pushState(o),console.log(\"simple back\")}e.replaceState(o),e.parseUrl(),e._popState=!0}})}})});","AbstractAction.js":"GollumJS.NS(GollumJS.Component,function(){this.AbstractAction=new GollumJS.Class({Extends:GollumJS.Component.Element,layerManager:null,getRequest:function(){var t={dest:URI(window.location.href).path(!0),query:URI(window.location.href).query(!0)},n=window.location.hash;return n&&\"#\"==n[0]&&(n=n.substr(1)),n&&(t.path=n.split(\"/\"),t.action=t.path.shift()),t},getUri:function(){var t=this.getRequest(),n=t.path?\"/\"+t.path.join(\"/\"):\"\";return this.name+n}})});"},"css":{}})});
 

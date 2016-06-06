@@ -54,6 +54,9 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			if (!GollumJS.config.debug) {
 				return this.loaderCompiled.load(component)
+					.then(function(component) {
+						return _this.loaderImg.load(component, component.infos);
+					})
 					.then(function() {
 						console.log('Load min component:', component);
 						return component;

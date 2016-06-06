@@ -10,11 +10,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			KEYWORD_ROOT: '_root',
 
 			isKeyword: function (str) {
-				return
-					str == this.KEYWORD_TARGET ||
-					str == this.KEYWORD_PARENT ||
-					str == this.KEYWORD_ROOT
-				;
+				return str == this.KEYWORD_TARGET || str == this.KEYWORD_PARENT || str == this.KEYWORD_ROOT;
 			},
 		},
 

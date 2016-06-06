@@ -117,21 +117,21 @@ GollumJS.NS(GollumJS.Component, function() {
 			if (this.action) {
 				this.action.remove();
 			}
-
+			
 			var component = this.getManager().getComponent('action:'+name);
 			return component.load()
 				.then(function () {
 					var gjsAction = $('<gjs-action action="'+name+'" ></gjs-action>');
-
+					
 					_this.dom.bind('gjs-render', function (e, element) {
 						if (element === gjsAction[0].GJSElement) {
-
+							
 							_this.action = element;
 							element.layerManager = _this;
 							
 							_this.setLoading(false);
 							
-							element.dom.find('> div').addClass('action');
+							element.dom.find('> div').addClass('gjs-action');
 						}
 					});
 					
@@ -144,7 +144,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			// 		this.dom.find('> div.gjs-controller').append(gjsAction);
 			// 	})
 			// ;
-
+			
 			/*return this.newComponentInstanceById ('action:'+name, {
 				name: name
 			}, query)

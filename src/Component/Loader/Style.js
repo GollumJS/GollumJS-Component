@@ -7,9 +7,14 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		Extends: GollumJS.Component.Loader.ALoader,
 		
 		/**
-		 * @var GollumJS.Ajax.Proxy
+		 * @var {GollumJS.Ajax.Proxy}
 		 */
 		ajaxProxy: null,
+		
+		/**
+		 * @var {[GollumJS.Component.Loader.Style.Include]}
+		 */
+		_includes: [],
 		
 		sassClassName: null,
 		_sass: null,
@@ -17,6 +22,11 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		initialize: function (ajaxProxy, sassClassName) {
 			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
+		},
+
+		addInclude: function (include) {
+			console.log (arguments);
+			this._includes.push(include);
 		},
 		
 		getSass: function () {
@@ -27,14 +37,12 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 			return this._sass;	
 		},
 		
-		coreMixin: function() {
-			return '' +
-				'@mixin gjs-component($src) {'     +"\n"+
-				'	gjs-component[src="#{$src}"] {'+"\n"+
-				'	   @content;'                  +"\n"+
-  				'	}'                             +"\n"+
-				'}'                                +"\n\n"
-			;
+		coreMixin: function(src) {
+			var content = '';
+			for (var i = 0; i < this._includes.length; i++) {
+				content += this._includes[i].getContent(src);
+			}
+			return content;
 		},
 		
 		load: function(component, json) {
@@ -62,7 +70,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 					})
 						.then(function (content) {
 							
-							content = _this.coreMixin() + content;
+							content = _this.coreMixin(component.src) + content;
 							
 							_this.getSass().compile(content, function(result) {
 								

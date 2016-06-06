@@ -22,7 +22,9 @@ GollumJS.config = GollumJS.Utils.extend ({
 			eventBinder   : 'GollumJS.Component.EventBinder',
 			optionsParser : 'GollumJS.Component.OptionsParser',
 			namer         : 'GollumJS.Component.Namer',
-			sass          : 'Sass'
+			sass          : 'Sass',
+			
+			styleLoaderIncludeCore: 'GollumJS.Component.Loader.Style.IncludeCore'
 		}
 	},
 	
@@ -56,12 +58,22 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'@ajaxProxy'
 			]
 		},
-		
+
 		componentLoaderStyle: {
 			class: '%className.component.styleLoader%',
 			args: [
 				'@ajaxProxy',
 				'%className.component.sass%',
+			],
+			'inject': {
+				'addInclude': 'component.style.include'
+			}
+		},
+		
+		componentLoaderStyleIncludeCore: {
+			class: '%className.component.styleLoaderIncludeCore%',
+			tags: [
+				{ 'name': 'component.style.include' }
 			]
 		},
 

@@ -12,6 +12,8 @@
 	"src/Component/Loader/ALoader.js",
 	"src/Component/Loader/Tpl.js",
 	"src/Component/Loader/Style.js",
+	"src/Component/Loader/Style/Include.js",
+	"src/Component/Loader/Style/IncludeCore.js",
 	"src/Component/Loader/Js.js",
 	"src/Component/Loader/Img.js",
 	"src/Component/Loader/Compiled.js",
