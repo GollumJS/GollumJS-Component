@@ -25,14 +25,20 @@ GollumJS.NS(GollumJS.Component, function() {
 		loaderJs: null,
 
 		/**
+		 * @var {GollumJS.Component.Loader.Img}
+		 */
+		loaderImg: null,
+
+		/**
 		 * @var {GollumJS.Component.Loader.Compiled}
 		 */
 		loaderCompiled: null,
 		
-		initialize: function (loaderTpl, loaderStyle, loaderJs, loaderCompiled) {
+		initialize: function (loaderTpl, loaderStyle, loaderJs, loaderImg, loaderCompiled) {
 			this.loaderTpl      = loaderTpl;
 			this.loaderStyle    = loaderStyle;
 			this.loaderJs       = loaderJs;
+			this.loaderImg      = loaderImg;
 			this.loaderCompiled = loaderCompiled;
 		},
 					
@@ -61,6 +67,9 @@ GollumJS.NS(GollumJS.Component, function() {
 				})
 				.then(function(json) {
 					return _this.loaderJs.load(component, json);
+				})
+				.then(function(json) {
+					return _this.loaderImg.load(component, json);
 				})
 				.then(function(json) {
 					component.infos = json;
