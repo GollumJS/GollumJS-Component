@@ -1,9 +1,8 @@
 GollumJS.NS(GollumJS.Component.Loader, function() {
 	
-	var JSON = JSON3;
 	var Promise = GollumJS.Promise;
 	
-	this.Js = new GollumJS.Class({
+	this.Img = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
 		
@@ -13,38 +12,37 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		load: function(component, json) {
 			
 			var _this = this;
-			var jsFiles = json.js;
+			var imgFiles = json.img;
 			
-			if (jsFiles) {
-				if (typeof jsFiles == 'string') {
-					jsFiles = [jsFiles];
+			if (imgFiles) {
+				if (typeof imgFiles == 'string') {
+					imgFiles = [imgFiles];
 				}
 				
-				return GollumJS.Utils.Collection.eachStep(jsFiles, function (i, file, step) {
+				var loadedDiv = $('<div style="position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				
+				return GollumJS.Utils.Collection.eachStep(imgFiles, function (i, file, step) {
 					
 					if (!file) {
 						step();
 						return;
 					}
 					
-					// _this._jsPromiseLoading
-					// .then(function () {
-							var script = document.createElement('script');
-							script.type = 'text/javascript';
-							script.async = true;
-							script.onload = function(){
-								step();
-							};
-							script.onerror = function(e){
-								reject(e);
-							};
-							script.src = _this.getBaseUrl(component)+file;
-							document.getElementsByTagName('body')[0].appendChild(script);
-					// 	})
-					// ;
+					var image = new Image();
+					image.onload = function() {
+						console.debug ('Preloading image:', file);
+						step();
+					};
+					image.onerrror = function(e) {
+						console.error ('Error preloading image: '+file, e);
+						step();
+					};
+					image.src = _this.getBaseUrl(component)+file;
+					loadedDiv.append(image);
 					
 				})
 					.then(function () {
+						loadedDiv.remove();
 						return json;
 					})
 				;

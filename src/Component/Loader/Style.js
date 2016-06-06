@@ -5,12 +5,17 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Style = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
-
+		
+		/**
+		 * @var GollumJS.Ajax.Proxy
+		 */
+		ajaxProxy: null,
+		
 		sassClassName: null,
 		_sass: null,
 		
 		initialize: function (ajaxProxy, sassClassName) {
-			this.parent()(ajaxProxy);
+			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
 		},
 		

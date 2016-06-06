@@ -13,6 +13,7 @@
 	"src/Component/Loader/Tpl.js",
 	"src/Component/Loader/Style.js",
 	"src/Component/Loader/Js.js",
+	"src/Component/Loader/Img.js",
 	"src/Component/Loader/Compiled.js",
 	"src/Component/PreloadTag.js",
 	"src/Component/AbstractTag.js",

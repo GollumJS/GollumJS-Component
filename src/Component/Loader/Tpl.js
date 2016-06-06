@@ -6,6 +6,15 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		
 		Extends: GollumJS.Component.Loader.ALoader,
 		
+		/**
+		 * @var GollumJS.Ajax.Proxy
+		 */
+		ajaxProxy: null,
+
+		initialize: function (ajaxProxy) {
+			this.ajaxProxy     = ajaxProxy;
+		},
+		
 		load: function(component) {
 			var base   = this.getBaseUrl(component);
 			var action = component.getActionName();

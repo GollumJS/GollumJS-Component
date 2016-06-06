@@ -16,6 +16,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 			tplLoader     : 'GollumJS.Component.Loader.Tpl',
 			styleLoader   : 'GollumJS.Component.Loader.Style',
 			jsLoader      : 'GollumJS.Component.Loader.Js',
+			imgLoader     : 'GollumJS.Component.Loader.Img',
 			compiledLoader: 'GollumJS.Component.Loader.Compiled',
 			renderer      : 'GollumJS.Component.Renderer',
 			eventBinder   : 'GollumJS.Component.EventBinder',
@@ -44,6 +45,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'@componentLoaderTpl',
 				'@componentLoaderStyle',
 				'@componentLoaderJs',
+				'@componentLoaderImg',
 				'@componentLoaderCompiled'
 			]
 		},
@@ -62,14 +64,15 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'%className.component.sass%',
 			]
 		},
-		
-		componentLoaderJs: {
-			class: '%className.component.jsLoader%',
-			args: [
-				'@ajaxProxy'
-			]
-		},
 
+		componentLoaderJs: {
+			class: '%className.component.jsLoader%'
+		},
+		
+		componentLoaderImg: {
+			class: '%className.component.imgLoader%'
+		},
+		
 		componentLoaderCompiled: {
 			class: '%className.component.compiledLoader%',
 			args: [
@@ -811,14 +814,20 @@ GollumJS.NS(GollumJS.Component, function() {
 		loaderJs: null,
 
 		/**
+		 * @var {GollumJS.Component.Loader.Img}
+		 */
+		loaderImg: null,
+
+		/**
 		 * @var {GollumJS.Component.Loader.Compiled}
 		 */
 		loaderCompiled: null,
 		
-		initialize: function (loaderTpl, loaderStyle, loaderJs, loaderCompiled) {
+		initialize: function (loaderTpl, loaderStyle, loaderJs, loaderImg, loaderCompiled) {
 			this.loaderTpl      = loaderTpl;
 			this.loaderStyle    = loaderStyle;
 			this.loaderJs       = loaderJs;
+			this.loaderImg      = loaderImg;
 			this.loaderCompiled = loaderCompiled;
 		},
 					
@@ -849,6 +858,9 @@ GollumJS.NS(GollumJS.Component, function() {
 					return _this.loaderJs.load(component, json);
 				})
 				.then(function(json) {
+					return _this.loaderImg.load(component, json);
+				})
+				.then(function(json) {
 					component.infos = json;
 					console.log('Load component:', component);
 					return component;
@@ -863,16 +875,7 @@ GollumJS.NS(GollumJS.Component, function() {
 GollumJS.NS(GollumJS.Component.Loader, function() {
 	
 	this.ALoader = new GollumJS.Class({
-
-		/**
-		 * @var GollumJS.Ajax.Proxy
-		 */
-		ajaxProxy: null,
 		
-		initialize: function (ajaxProxy) {
-			this.ajaxProxy = ajaxProxy;
-		},
-
 		getBaseUrl: function(component) {
 			var controller = component.getPathName();
 			var action     = component.getActionName();
@@ -890,6 +893,15 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Tpl = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
+		
+		/**
+		 * @var GollumJS.Ajax.Proxy
+		 */
+		ajaxProxy: null,
+
+		initialize: function (ajaxProxy) {
+			this.ajaxProxy     = ajaxProxy;
+		},
 		
 		load: function(component) {
 			var base   = this.getBaseUrl(component);
@@ -937,12 +949,17 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Style = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
-
+		
+		/**
+		 * @var GollumJS.Ajax.Proxy
+		 */
+		ajaxProxy: null,
+		
 		sassClassName: null,
 		_sass: null,
 		
 		initialize: function (ajaxProxy, sassClassName) {
-			this.parent()(ajaxProxy);
+			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
 		},
 		
@@ -1083,6 +1100,63 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 					
 				})
 					.then(function () {
+						return json;
+					})
+				;
+			}
+			
+			return Promise.resolve(json);
+		}
+		
+	});
+
+});
+
+GollumJS.NS(GollumJS.Component.Loader, function() {
+	
+	var Promise = GollumJS.Promise;
+	
+	this.Img = new GollumJS.Class({
+		
+		Extends: GollumJS.Component.Loader.ALoader,
+		
+		/**
+		 * Load component
+		 */
+		load: function(component, json) {
+			
+			var _this = this;
+			var imgFiles = json.img;
+			
+			if (imgFiles) {
+				if (typeof imgFiles == 'string') {
+					imgFiles = [imgFiles];
+				}
+				
+				var loadedDiv = $('<div style="position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				
+				return GollumJS.Utils.Collection.eachStep(imgFiles, function (i, file, step) {
+					
+					if (!file) {
+						step();
+						return;
+					}
+					
+					var image = new Image();
+					image.onload = function() {
+						console.debug ('Preloading image:', file);
+						step();
+					};
+					image.onerrror = function(e) {
+						console.error ('Error preloading image: '+file, e);
+						step();
+					};
+					image.src = _this.getBaseUrl(component)+file;
+					loadedDiv.append(image);
+					
+				})
+					.then(function () {
+						loadedDiv.remove();
 						return json;
 					})
 				;

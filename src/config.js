@@ -16,6 +16,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 			tplLoader     : 'GollumJS.Component.Loader.Tpl',
 			styleLoader   : 'GollumJS.Component.Loader.Style',
 			jsLoader      : 'GollumJS.Component.Loader.Js',
+			imgLoader     : 'GollumJS.Component.Loader.Img',
 			compiledLoader: 'GollumJS.Component.Loader.Compiled',
 			renderer      : 'GollumJS.Component.Renderer',
 			eventBinder   : 'GollumJS.Component.EventBinder',
@@ -44,6 +45,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'@componentLoaderTpl',
 				'@componentLoaderStyle',
 				'@componentLoaderJs',
+				'@componentLoaderImg',
 				'@componentLoaderCompiled'
 			]
 		},
@@ -62,14 +64,15 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'%className.component.sass%',
 			]
 		},
-		
-		componentLoaderJs: {
-			class: '%className.component.jsLoader%',
-			args: [
-				'@ajaxProxy'
-			]
-		},
 
+		componentLoaderJs: {
+			class: '%className.component.jsLoader%'
+		},
+		
+		componentLoaderImg: {
+			class: '%className.component.imgLoader%'
+		},
+		
 		componentLoaderCompiled: {
 			class: '%className.component.compiledLoader%',
 			args: [
