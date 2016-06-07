@@ -14,19 +14,17 @@ if (
 fs = require('fs');
 
 // loading GollumJS Lib
-require('gollumjs');
-var sass      = require('sass.js');
+var GollumJS  = require('gollumjs');
 var uglifyjs  = require('uglifyjs');
 var uglifycss = require('uglifycss');
 global.JSON3  = require('json3');
 global.ejs    = require('ejs');
-GollumJS.Component = { Loader: {} }; // Genereate fake namespace
-require(__dirname+'/../src/Component/Loader/ALoader.js');
-require(__dirname+'/../src/Component/Loader/Tpl.js');
-require(__dirname+'/../src/Component/Loader/Style.js');
+global.Sass   = require('sass.js');
 
-var tplLoader   = new GollumJS.Component.Loader.Tpl();
-var styleLoader = new GollumJS.Component.Loader.Style(null, sass);
+require(__dirname+'/../index.js');
+
+var tplLoader   = GollumJS.get('componentLoaderTpl');
+var styleLoader = GollumJS.get('componentLoaderStyle');
 
 // End loading GollumJS Lib
 
@@ -139,7 +137,7 @@ fs.readdir(pathComponent, function (err, controllers) {
 									GollumJS.Utils.Collection.eachStep(compiled.css, function (file, content, step) {
 										
 										content = styleLoader.coreMixin() + content;
-										sass.compile(content, function(result) {
+										Sass.compile(content, function(result) {
 											try {
 												if (result.status) {
 													throw new GollumJS.Exception(result.message);

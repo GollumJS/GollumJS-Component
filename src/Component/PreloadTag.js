@@ -1,3 +1,5 @@
+HTMLElement = typeof HTMLElement !== 'undefined' ? HTMLElement : new GollumJS.Class({});
+
 GollumJS.NS(GollumJS.Component, function() {
 	
 	var Collection = GollumJS.Utils.Collection;
