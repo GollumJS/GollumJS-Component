@@ -136,7 +136,7 @@ fs.readdir(pathComponent, function (err, controllers) {
 									
 									GollumJS.Utils.Collection.eachStep(compiled.css, function (file, content, step) {
 										
-										content = styleLoader.coreMixin() + content;
+										content = styleLoader.coreMixin(controller+':'+action) + content;
 										Sass.compile(content, function(result) {
 											try {
 												if (result.status) {
