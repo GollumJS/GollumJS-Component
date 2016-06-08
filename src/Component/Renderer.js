@@ -11,9 +11,17 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			var _this = this;
 			var render = function () {
-				var html = element.component.infos.template(element)
-						.replace(new RegExp('>\\s+<', 'g'), '><')
-					;
+				
+				var data = {
+					element: element,
+					content: function () {
+						return element.dom[0].originalContent;
+					}
+				};
+				
+				var html = element.component.infos.template(data)
+					.replace(new RegExp('>\\s+<', 'g'), '><')
+				;
 				var inner = $.parseHTML(html);
 				_this.clean(element);
 				element.dom.append(inner);

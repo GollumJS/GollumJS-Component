@@ -26,8 +26,6 @@ require(__dirname+'/../index.js');
 var tplLoader   = GollumJS.get('componentLoaderTpl');
 var styleLoader = GollumJS.get('componentLoaderStyle');
 
-// End loading GollumJS Lib
-
 
 var webPath = './web';
 var argpos = process.argv.indexOf('--web-path');

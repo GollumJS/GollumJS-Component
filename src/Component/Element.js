@@ -60,13 +60,6 @@ GollumJS.NS(GollumJS.Component, function() {
 			return p[0].GJSElement ? p[0].GJSElement : null;
 		},
 		
-		/**
-		 * @return string
-		 */
-		content: function () {
-			return this.dom[0].originalContent;
-		},
-		
 		remove: function () {
 			this.dom.remove();
 		},

@@ -559,13 +559,6 @@ GollumJS.NS(GollumJS.Component, function() {
 			return p[0].GJSElement ? p[0].GJSElement : null;
 		},
 		
-		/**
-		 * @return string
-		 */
-		content: function () {
-			return this.dom[0].originalContent;
-		},
-		
 		remove: function () {
 			this.dom.remove();
 		},
@@ -625,9 +618,17 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			var _this = this;
 			var render = function () {
-				var html = element.component.infos.template(element)
-						.replace(new RegExp('>\\s+<', 'g'), '><')
-					;
+				
+				var data = {
+					element: element,
+					content: function () {
+						return element.dom[0].originalContent;
+					}
+				};
+				
+				var html = element.component.infos.template(data)
+					.replace(new RegExp('>\\s+<', 'g'), '><')
+				;
 				var inner = $.parseHTML(html);
 				_this.clean(element);
 				element.dom.append(inner);
@@ -980,7 +981,6 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		},
 
 		addInclude: function (include) {
-			console.log (arguments);
 			this._includes.push(include);
 		},
 		
@@ -1004,7 +1004,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 			
 			var _this = this;
 			var cssFiles = json.css;
-
+			
 			if (cssFiles) {
 				if (typeof cssFiles == 'string') {
 					cssFiles = [cssFiles];
@@ -1016,9 +1016,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 						step();
 						return;
 					}
-
+					
 					var url = _this.getBaseUrl(component)+file;
-
+					
 					_this.ajaxProxy.request({
 						url: url,
 						dataType: 'text'
@@ -1055,21 +1055,20 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 			}
 			return Promise.resolve(json);
 		},
-
+		
 		injectStyle: function (src, styleRules) {
 			var old = $(document.head).find('style[data-src="src"]');
-
+				
 			var style = $('<style data-src="'+src+'" >'+"\n/* "+src+" */\n\n"+styleRules+'</style>');
 			style.appendTo(document.head);
-
+			
 			if (old.length) {
 				old.remove();
 			}
 		}
-
-
+		
 	});
-
+	
 });
 
 GollumJS.NS(GollumJS.Component.Loader.Style, function() {
