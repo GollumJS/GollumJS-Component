@@ -31,7 +31,6 @@ GollumJS.NS(GollumJS, function() {
 				.then(function() {
 					
 					var element = _this.createElement(dom);
-					
 					var mostRendered = true;
 					var parent = element.getParentElement();
 					if (
