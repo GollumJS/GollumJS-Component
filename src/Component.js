@@ -40,7 +40,15 @@ GollumJS.NS(GollumJS, function() {
 						mostRendered = parent.rendered;
 					}
 					if (!parent || !mostRendered) {
-						return Promise.resolve(null);
+						return new Promise(function (resolve, reject) {
+							if (!dom._differedRender) {
+								dom._differedRender = [];
+							}
+							dom._differedRender.push({
+								resolve: resolve,
+								reject: reject
+							});
+						});
 					}
 					
 					// TODO Factoring into Renderer service
@@ -59,13 +67,43 @@ GollumJS.NS(GollumJS, function() {
 						.then(function () {
 							element.afterRender();
 							element.rendered = true;
-							element.dom.trigger( 'gjs-render', [ element ]);
-							return element;
+							
+							if (dom._differedRender) {
+								for (var i = 0; i < dom._differedRender.length; i++) {
+									dom._differedRender[i].resolve(element);
+								}
+								delete dom._differedRender;
+							}
+							
+							// Render child not rendered
+							var childs = element.getChilds();
+							return GollumJS.Utils.Collection.eachStep(childs, function (name, child, step) {
+								if (child.rendered) {
+									step();
+									return;
+								}
+								child.component.render(child.dom)
+									.then(function() {
+										step();
+									})
+								;
+							})
+								.then(function() {
+									element.dom.trigger( 'gjs-render', [ element ]);
+									return element;
+								})
+							;
 						});
 					;
 				})
 				.catch(function(e) {
 					console.error(e);
+					if (dom._differedRender) {
+						for (var i = 0; i < dom._differedRender.length; i++) {
+							dom._differedRender[i].reject(e);
+						}
+						delete dom._differedRender;
+					}
 					return null;
 				})
 			;
