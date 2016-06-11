@@ -154,7 +154,6 @@ GollumJS.NS(GollumJS, function() {
 				.then(function() {
 					
 					var element = _this.createElement(dom);
-					
 					var mostRendered = true;
 					var parent = element.getParentElement();
 					if (
@@ -599,6 +598,34 @@ GollumJS.NS(GollumJS.Component, function() {
 		
 		remove: function () {
 			this.dom.remove();
+		},
+		
+		getOption: function(name, defaultValue, type) {
+			defaultValue = typeof defaultValue == 'undefined' ? null : defaultValue;
+			
+			if (typeof this.options[name] == 'undefined') {
+				return defaultValue;
+			}
+			var value = this.options[name];
+			
+			if (type == 'int') {
+				value = parseInt(value, 10);
+			} else
+			if (type == 'float') {
+				value = parseFloat(value, 10);
+			} else
+			if (type == 'bool') {
+				if (typeof value == 'string') {
+					if (value.toLowerCase() == 'false') {
+						value = false;
+					} else if (value.toLowerCase() == 'true') {
+						value = true;
+					}
+				}
+				value = !!value;
+			}
+			
+			return value;
 		},
 		
 		/**
