@@ -600,6 +600,10 @@ GollumJS.NS(GollumJS.Component, function() {
 			this.dom.remove();
 		},
 		
+		getOriginalContent: function () {
+			return this.dom[0].originalContent;	
+		},
+		
 		getOption: function(name, defaultValue, type) {
 			defaultValue = typeof defaultValue == 'undefined' ? null : defaultValue;
 			
@@ -1181,11 +1185,14 @@ GollumJS.NS(GollumJS.Component.Loader.Style, function() {
 				'	@return \'components/\'+$component+\'/\'+$path;'     +"\n"+
 				'}'                                                      +"\n\n"+
 
-				'@mixin gjs-component($src) {'     +"\n"+
-				'	gjs-component[src="#{$src}"] {'+"\n"+
-				'	   @content;'                  +"\n"+
-				'	}'                             +"\n"+
-				'}'                                +"\n\n"
+				'@mixin gjs-component($src: null) {'       +"\n"+
+				'	@if $src == null {'                    +"\n"+
+				'		$src: \''+src+'\';'                +"\n"+
+				'	}'                                     +"\n"+
+				'	gjs-component[src="#{$src}"] {'        +"\n"+
+				'	   @content;'                          +"\n"+
+				'	}'                                     +"\n"+
+				'}'                                        +"\n\n"
 			;
 		}
 		
@@ -1259,6 +1266,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Img = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
+
+		loadedDiv: null,
 		
 		/**
 		 * Load component
@@ -1273,7 +1282,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 					imgFiles = [imgFiles];
 				}
 				
-				var loadedDiv = $('<div style="position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				if (!this.loadedDiv) {
+					this.loadedDiv = $('<div style="width: 0; height: 0; overflow: hidden;position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				}
 				
 				return GollumJS.Utils.Collection.eachStep(imgFiles, function (i, file, step) {
 					
@@ -1292,11 +1303,10 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 						step();
 					};
 					image.src = _this.getBaseUrl(component)+file;
-					loadedDiv.append(image);
+					_this.loadedDiv.append(image);
 					
 				})
 					.then(function () {
-						loadedDiv.remove();
 						return json;
 					})
 				;

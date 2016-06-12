@@ -5,6 +5,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 	this.Img = new GollumJS.Class({
 		
 		Extends: GollumJS.Component.Loader.ALoader,
+
+		loadedDiv: null,
 		
 		/**
 		 * Load component
@@ -19,7 +21,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 					imgFiles = [imgFiles];
 				}
 				
-				var loadedDiv = $('<div style="position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				if (!this.loadedDiv) {
+					this.loadedDiv = $('<div style="width: 0; height: 0; overflow: hidden;position: fixed; top: -30000px; left: -30000px;" ></div>').appendTo(document.body);
+				}
 				
 				return GollumJS.Utils.Collection.eachStep(imgFiles, function (i, file, step) {
 					
@@ -38,11 +42,10 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 						step();
 					};
 					image.src = _this.getBaseUrl(component)+file;
-					loadedDiv.append(image);
+					_this.loadedDiv.append(image);
 					
 				})
 					.then(function () {
-						loadedDiv.remove();
 						return json;
 					})
 				;

@@ -64,6 +64,10 @@ GollumJS.NS(GollumJS.Component, function() {
 			this.dom.remove();
 		},
 		
+		getOriginalContent: function () {
+			return this.dom[0].originalContent;	
+		},
+		
 		getOption: function(name, defaultValue, type) {
 			defaultValue = typeof defaultValue == 'undefined' ? null : defaultValue;
 			

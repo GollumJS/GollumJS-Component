@@ -31,11 +31,14 @@ GollumJS.NS(GollumJS.Component.Loader.Style, function() {
 				'	@return \'components/\'+$component+\'/\'+$path;'     +"\n"+
 				'}'                                                      +"\n\n"+
 
-				'@mixin gjs-component($src) {'     +"\n"+
-				'	gjs-component[src="#{$src}"] {'+"\n"+
-				'	   @content;'                  +"\n"+
-				'	}'                             +"\n"+
-				'}'                                +"\n\n"
+				'@mixin gjs-component($src: null) {'       +"\n"+
+				'	@if $src == null {'                    +"\n"+
+				'		$src: \''+src+'\';'                +"\n"+
+				'	}'                                     +"\n"+
+				'	gjs-component[src="#{$src}"] {'        +"\n"+
+				'	   @content;'                          +"\n"+
+				'	}'                                     +"\n"+
+				'}'                                        +"\n\n"
 			;
 		}
 		
