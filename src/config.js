@@ -13,6 +13,10 @@ GollumJS.config = GollumJS.Utils.extend ({
 		baseUrl: 'components/'
 	},
 	
+	sass: {
+		worker: ''	
+	},
+	
 	className: {
 		component: {
 			manager       : 'GollumJS.Component.Manager',
@@ -70,6 +74,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'%component.baseUrl%',
 				'@ajaxProxy',
 				'%className.component.sass%',
+				'%sass.worker%'
 			],
 			'inject': {
 				'addInclude': 'component.style.include'

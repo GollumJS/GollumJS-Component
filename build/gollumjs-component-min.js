@@ -13,6 +13,10 @@ GollumJS.config = GollumJS.Utils.extend ({
 		baseUrl: 'components/'
 	},
 	
+	sass: {
+		worker: ''	
+	},
+	
 	className: {
 		component: {
 			manager       : 'GollumJS.Component.Manager',
@@ -70,6 +74,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 				'%component.baseUrl%',
 				'@ajaxProxy',
 				'%className.component.sass%',
+				'%sass.worker%'
 			],
 			'inject': {
 				'addInclude': 'component.style.include'
@@ -1082,12 +1087,14 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		_includes: [],
 		
 		sassClassName: null,
+		workerPath: null,
 		_sass: null,
 		
-		initialize: function (baseUrl, ajaxProxy, sassClassName) {
+		initialize: function (baseUrl, ajaxProxy, sassClassName, workerPath) {
 			this.parent()(baseUrl);
 			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
+			this.workerPath    = workerPath;
 		},
 
 		addInclude: function (include) {
@@ -1097,6 +1104,7 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		getSass: function () {
 			if (!this._sass) {
 				var clazz = GollumJS.Reflection.ReflectionClass.getClassByName(this.sassClassName);
+				Sass.setWorkerUrl(this.workerPath);
 				this._sass = new clazz();
 			}
 			return this._sass;	
