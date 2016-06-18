@@ -16,7 +16,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		 */
 		loaderStyle: null,
 
-		initialize: function (loaderTpl, loaderStyle) {
+		initialize: function (baseUrl, loaderTpl, loaderStyle) {
+			this.parent()(baseUrl);
 			this.loaderTpl   = loaderTpl;
 			this.loaderStyle = loaderStyle;
 		},

@@ -212,9 +212,24 @@ GollumJS.NS(GollumJS, function() {
 			return split[0] ? split[0] : '';
 		},
 
+		getPath: function() {
+			var split      = this.src.split(':');
+			var fullAction = split[1] ? split[1] : '';
+			var pos = fullAction.indexOf('/');
+			if (pos == -1) {
+				return '';
+			}
+			return fullAction.substr(0, pos+1);
+		},
+
 		getActionName: function() {
 			var split      = this.src.split(':');
-			return split[1] ? split[1] : '';
+			var fullAction = split[1] ? split[1] : '';
+			var pos = fullAction.indexOf('/');
+			if (pos == -1) {
+				return fullAction;
+			}
+			return fullAction.substr(pos+1);
 		}
 		
 	});

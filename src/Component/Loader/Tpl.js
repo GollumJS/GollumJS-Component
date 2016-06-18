@@ -11,13 +11,15 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		 */
 		ajaxProxy: null,
 
-		initialize: function (ajaxProxy) {
-			this.ajaxProxy     = ajaxProxy;
+		initialize: function (baseUrl, ajaxProxy) {
+			this.parent()(baseUrl);
+			this.ajaxProxy = ajaxProxy;
 		},
 		
 		load: function(component) {
 			var base   = this.getBaseUrl(component);
 			var action = component.getActionName();
+			console.log(this);
 			return this.ajaxProxy.request({
 				url: base+action+'.ejs'
 			})

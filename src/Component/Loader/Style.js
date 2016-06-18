@@ -19,7 +19,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		sassClassName: null,
 		_sass: null,
 		
-		initialize: function (ajaxProxy, sassClassName) {
+		initialize: function (baseUrl, ajaxProxy, sassClassName) {
+			this.parent()(baseUrl);
 			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
 		},

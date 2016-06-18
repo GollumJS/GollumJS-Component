@@ -8,6 +8,10 @@ GollumJS.config = GollumJS.Utils.extend ({
 		path: [ '%node.gollumjs_component_path%/index.js' ],
 		excludesPath: ["%node.gollumjs_component_path%/src"],
 	},
+
+	component: {
+		baseUrl: 'components/'
+	},
 	
 	className: {
 		component: {
@@ -55,6 +59,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentLoaderTpl: {
 			class: '%className.component.tplLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@ajaxProxy'
 			]
 		},
@@ -62,6 +67,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentLoaderStyle: {
 			class: '%className.component.styleLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@ajaxProxy',
 				'%className.component.sass%',
 			],
@@ -72,22 +78,32 @@ GollumJS.config = GollumJS.Utils.extend ({
 		
 		componentLoaderStyleIncludeCore: {
 			class: '%className.component.styleLoaderIncludeCore%',
+			args: [
+				'%component.baseUrl%',
+			],
 			tags: [
 				{ 'name': 'component.style.include' }
 			]
 		},
 
 		componentLoaderJs: {
-			class: '%className.component.jsLoader%'
+			class: '%className.component.jsLoader%',
+			args: [
+				'%component.baseUrl%',
+			]
 		},
 		
 		componentLoaderImg: {
-			class: '%className.component.imgLoader%'
+			class: '%className.component.imgLoader%',
+			args: [
+				'%component.baseUrl%',
+			]
 		},
 		
 		componentLoaderCompiled: {
 			class: '%className.component.compiledLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@componentLoaderTpl',
 				'@componentLoaderStyle'
 			]
@@ -96,6 +112,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentPreloader: {
 			class: 'GollumJS.Component.Preloader',
 			args: [
+				'%component.baseUrl%',
 				'@componentManager'
 			]
 		},

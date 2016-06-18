@@ -8,6 +8,10 @@ GollumJS.config = GollumJS.Utils.extend ({
 		path: [ '%node.gollumjs_component_path%/index.js' ],
 		excludesPath: ["%node.gollumjs_component_path%/src"],
 	},
+
+	component: {
+		baseUrl: 'components/'
+	},
 	
 	className: {
 		component: {
@@ -55,6 +59,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentLoaderTpl: {
 			class: '%className.component.tplLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@ajaxProxy'
 			]
 		},
@@ -62,6 +67,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentLoaderStyle: {
 			class: '%className.component.styleLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@ajaxProxy',
 				'%className.component.sass%',
 			],
@@ -72,22 +78,32 @@ GollumJS.config = GollumJS.Utils.extend ({
 		
 		componentLoaderStyleIncludeCore: {
 			class: '%className.component.styleLoaderIncludeCore%',
+			args: [
+				'%component.baseUrl%',
+			],
 			tags: [
 				{ 'name': 'component.style.include' }
 			]
 		},
 
 		componentLoaderJs: {
-			class: '%className.component.jsLoader%'
+			class: '%className.component.jsLoader%',
+			args: [
+				'%component.baseUrl%',
+			]
 		},
 		
 		componentLoaderImg: {
-			class: '%className.component.imgLoader%'
+			class: '%className.component.imgLoader%',
+			args: [
+				'%component.baseUrl%',
+			]
 		},
 		
 		componentLoaderCompiled: {
 			class: '%className.component.compiledLoader%',
 			args: [
+				'%component.baseUrl%',
 				'@componentLoaderTpl',
 				'@componentLoaderStyle'
 			]
@@ -96,6 +112,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 		componentPreloader: {
 			class: 'GollumJS.Component.Preloader',
 			args: [
+				'%component.baseUrl%',
 				'@componentManager'
 			]
 		},
@@ -335,9 +352,24 @@ GollumJS.NS(GollumJS, function() {
 			return split[0] ? split[0] : '';
 		},
 
+		getPath: function() {
+			var split      = this.src.split(':');
+			var fullAction = split[1] ? split[1] : '';
+			var pos = fullAction.indexOf('/');
+			if (pos == -1) {
+				return '';
+			}
+			return fullAction.substr(0, pos+1);
+		},
+
 		getActionName: function() {
 			var split      = this.src.split(':');
-			return split[1] ? split[1] : '';
+			var fullAction = split[1] ? split[1] : '';
+			var pos = fullAction.indexOf('/');
+			if (pos == -1) {
+				return fullAction;
+			}
+			return fullAction.substr(pos+1);
 		}
 		
 	});
@@ -956,11 +988,18 @@ GollumJS.NS(GollumJS.Component, function() {
 GollumJS.NS(GollumJS.Component.Loader, function() {
 	
 	this.ALoader = new GollumJS.Class({
+
+		baseUrl: null,
+		
+		initialize: function (baseUrl) {
+			this.baseUrl = baseUrl;	
+		},
 		
 		getBaseUrl: function(component) {
 			var controller = component.getPathName();
+			var path       = component.getPath();
 			var action     = component.getActionName();
-			return 'components/'+controller+'/'+action+'/';
+			return this.baseUrl+controller+'/'+path+action+'/';
 		}
 		
 	});
@@ -980,13 +1019,15 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		 */
 		ajaxProxy: null,
 
-		initialize: function (ajaxProxy) {
-			this.ajaxProxy     = ajaxProxy;
+		initialize: function (baseUrl, ajaxProxy) {
+			this.parent()(baseUrl);
+			this.ajaxProxy = ajaxProxy;
 		},
 		
 		load: function(component) {
 			var base   = this.getBaseUrl(component);
 			var action = component.getActionName();
+			console.log(this);
 			return this.ajaxProxy.request({
 				url: base+action+'.ejs'
 			})
@@ -1044,7 +1085,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		sassClassName: null,
 		_sass: null,
 		
-		initialize: function (ajaxProxy, sassClassName) {
+		initialize: function (baseUrl, ajaxProxy, sassClassName) {
+			this.parent()(baseUrl);
 			this.ajaxProxy     = ajaxProxy;
 			this.sassClassName = sassClassName;
 		},
@@ -1337,7 +1379,8 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		 */
 		loaderStyle: null,
 
-		initialize: function (loaderTpl, loaderStyle) {
+		initialize: function (baseUrl, loaderTpl, loaderStyle) {
+			this.parent()(baseUrl);
 			this.loaderTpl   = loaderTpl;
 			this.loaderStyle = loaderStyle;
 		},
