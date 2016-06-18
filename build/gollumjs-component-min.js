@@ -1027,7 +1027,6 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		load: function(component) {
 			var base   = this.getBaseUrl(component);
 			var action = component.getActionName();
-			console.log(this);
 			return this.ajaxProxy.request({
 				url: base+action+'.ejs'
 			})
