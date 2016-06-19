@@ -14,7 +14,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 	},
 	
 	sass: {
-		worker: ''	
+		worker: null
 	},
 	
 	className: {
@@ -970,17 +970,21 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			return this.loaderTpl.load(component)
 				.then(function(json) {
+					console.debug('Tpl load:', component.src, component);
 					return _this.loaderStyle.load(component, json);
 				})
 				.then(function(json) {
+					console.debug('Style load:', component.src, component);
 					return _this.loaderJs.load(component, json);
 				})
 				.then(function(json) {
+					console.debug('Js load:', component.src, component);
 					return _this.loaderImg.load(component, json);
 				})
 				.then(function(json) {
 					component.infos = json;
-					console.log('Load component:', component);
+					console.debug('Img load:', component.src, component);
+					console.debug('Load component finish:', component.src, component);
 					return component;
 				})
 			;
@@ -1104,7 +1108,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		getSass: function () {
 			if (!this._sass) {
 				var clazz = GollumJS.Reflection.ReflectionClass.getClassByName(this.sassClassName);
-				Sass.setWorkerUrl(this.workerPath);
+				if (this.workerPath) {
+					Sass.setWorkerUrl(this.workerPath);
+				}
 				this._sass = new clazz();
 			}
 			return this._sass;	

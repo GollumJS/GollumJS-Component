@@ -14,7 +14,7 @@ GollumJS.config = GollumJS.Utils.extend ({
 	},
 	
 	sass: {
-		worker: ''	
+		worker: null
 	},
 	
 	className: {

@@ -34,7 +34,9 @@ GollumJS.NS(GollumJS.Component.Loader, function() {
 		getSass: function () {
 			if (!this._sass) {
 				var clazz = GollumJS.Reflection.ReflectionClass.getClassByName(this.sassClassName);
-				Sass.setWorkerUrl(this.workerPath);
+				if (this.workerPath) {
+					Sass.setWorkerUrl(this.workerPath);
+				}
 				this._sass = new clazz();
 			}
 			return this._sass;	

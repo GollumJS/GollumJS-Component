@@ -48,7 +48,10 @@
 		<script src="../src/Component/Loader/ALoader.js"></script>
 		<script src="../src/Component/Loader/Tpl.js"></script>
 		<script src="../src/Component/Loader/Style.js"></script>
+		<script src="../src/Component/Loader/Style/Include.js"></script>
+		<script src="../src/Component/Loader/Style/IncludeCore.js"></script>
 		<script src="../src/Component/Loader/Js.js"></script>
+		<script src="../src/Component/Loader/Img.js"></script>
 		<script src="../src/Component/Loader/Compiled.js"></script>
 		<script src="../src/Component/PreloadTag.js"></script>
 		<script src="../src/Component/AbstractTag.js"></script>
@@ -61,6 +64,7 @@
 		
 		<script type="text/javascript" >
 		//<!--
+			GollumJS.config.debug = true;
 			GollumJS.Utils.addDOMEvent(window, 'load', function() {
 				var app = new App ();
 			});
