@@ -215,7 +215,7 @@ GollumJS.NS(GollumJS, function() {
 		getPath: function() {
 			var split      = this.src.split(':');
 			var fullAction = split[1] ? split[1] : '';
-			var pos = fullAction.indexOf('/');
+			var pos = fullAction.lastIndexOf('/');
 			if (pos == -1) {
 				return '';
 			}
@@ -225,7 +225,7 @@ GollumJS.NS(GollumJS, function() {
 		getActionName: function() {
 			var split      = this.src.split(':');
 			var fullAction = split[1] ? split[1] : '';
-			var pos = fullAction.indexOf('/');
+			var pos = fullAction.lastIndexOf('/');
 			if (pos == -1) {
 				return fullAction;
 			}

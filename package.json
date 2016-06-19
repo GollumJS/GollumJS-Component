@@ -31,7 +31,8 @@
   },
   "devDependencies": {
     "uglifycss": "0.0.20",
-    "uglifyjs": "^2.4.10"
+    "uglifyjs": "^2.4.10",
+    "glob": "^7.0"
   },
   "scripts": {
     "clean": "rm -rf ./build/*;",

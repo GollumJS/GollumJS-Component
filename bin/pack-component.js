@@ -12,6 +12,7 @@ if (
 }
 
 fs = require('fs');
+var glob       = require("glob");
 
 // loading GollumJS Lib
 var GollumJS  = require('gollumjs');
@@ -74,112 +75,106 @@ fs.readdir(pathComponent, function (err, controllers) {
 				
 				console.log ('  Controller found:', controller);
 				
-				fs.readdir(controllerPath, function (err, actions) {
-					actions.forEach(function (action) {
-						
-						if (err) {
-							console.error (err);
-							return;
-						}
-						
-						var actionPath = controllerPath+'/'+action;
-						var sates	  = fs.statSync(actionPath);
-						
-						if (sates.isDirectory()) {
-							
-							var ejsPath = actionPath+'/'+action+'.ejs';
-							if (fs.existsSync(ejsPath)) {
-								sates = fs.statSync(ejsPath);
-								
-								if (sates.isFile()) {
-									console.log ('    Action found:', action);
-									
-									var compiled = {
-										src: controller + ':' + action,
-										ejs: fs.readFileSync(ejsPath, "utf8"),
-										js : {},
-										css: {}
-									};
-									var json = tplLoader.parseInfos(compiled.ejs);
-									
-									// JS
-									
-									var filesJS = json.js;
-									if (filesJS) {
-										if (typeof filesJS == 'string') {
-											filesJS = [filesJS];
-										}
-										for (var i = 0; i < filesJS.length; i++) {
-											var fileJS = filesJS[i];
-											compiled.js[fileJS] = fs.readFileSync(actionPath+'/'+fileJS, "utf8");
-										}
-									}
-									
-									// CSS
-									
-									var filesCSS = json.css;
-									if (filesCSS) {
-										
-										if (typeof filesCSS == 'string') {
-											filesCSS = [filesCSS];
-										}
-										
-										for (var i = 0; i < filesCSS.length; i++) {
-											var fileCSS = filesCSS[i];
-											var css = fs.readFileSync(actionPath+'/'+fileCSS, "utf8");
-											compiled.css[fileCSS] = css;
-										}
-										
-									}
-									
-									GollumJS.Utils.Collection.eachStep(compiled.css, function (file, content, step) {
-										
-										content = styleLoader.coreMixin(controller+':'+action) + content;
-										Sass.compile(content, function(result) {
-											try {
-												if (result.status) {
-													throw new GollumJS.Exception(result.message);
-												} else {
-													compiled.css[file] = result.text;
-													step();
-												}
-											} catch (e) {
-												console.error('Error on compile component CSS:', actionPath+'/'+file, e);
-												step();
-											}
-										});
-									})
-										.then(function () {
-											
-											writeCompiledJS(actionPath + '/compiled.js', compiled);
-											
-											for (var f in compiled.css) {
-												compiled.css[f] = uglifycss.processString(
-													compiled.css[f],
-													{ maxLineLen: 500, expandVars: true }
-												);
-											}
-											
-											for (var f in compiled.js) {
-												compiled.js[f] = uglifyjs.minify(
-													compiled.js[f],
-													{ fromString: true }
-												).code;
-											}
-											
-											writeCompiledJS(actionPath + '/compiled.min.js', compiled);
-											
-										})
-										.catch(console.error)
-									;
-									
-								}
+				var actions = glob.sync(controllerPath+'/**/*.cpt.ejs');
+				actions.forEach(function(ejsPath) {
+					var fullAction = ejsPath.substr(controllerPath.length+1);
+					fullAction = fullAction.substr(0, fullAction.lastIndexOf('/'));
+					var pos = fullAction.lastIndexOf('/');
+					var path = (pos != -1) ? fullAction.substr(0, pos+1) : '';
+					var action = (pos != -1) ? fullAction.substr(pos+1) : fullAction;
+
+					var actionPath = controllerPath+'/'+path+action;
+					
+					var sates = fs.statSync(ejsPath);
+					if (sates.isFile()) {
+						console.log ('    Action found:', path+action);
+
+						var compiled = {
+							src: controller + ':' + path + action,
+							ejs: fs.readFileSync(ejsPath, "utf8"),
+							js : {},
+							css: {}
+						};
+						var json = tplLoader.parseInfos(compiled.ejs);
+
+						// JS
+
+						var filesJS = json.js;
+						if (filesJS) {
+							if (typeof filesJS == 'string') {
+								filesJS = [filesJS];
 							}
-	
+							for (var i = 0; i < filesJS.length; i++) {
+								var fileJS = filesJS[i];
+								compiled.js[fileJS] = fs.readFileSync(actionPath+'/'+fileJS, "utf8");
+							}
 						}
-					});
+
+						// CSS
+
+						var filesCSS = json.css;
+						if (filesCSS) {
+
+							if (typeof filesCSS == 'string') {
+								filesCSS = [filesCSS];
+							}
+
+							for (var i = 0; i < filesCSS.length; i++) {
+								var fileCSS = filesCSS[i];
+								var css = fs.readFileSync(actionPath+'/'+fileCSS, "utf8");
+								compiled.css[fileCSS] = css;
+							}
+
+						}
+
+						GollumJS.Utils.Collection.eachStep(compiled.css, function (file, content, step) {
+							
+							content = styleLoader.coreMixin(controller+':'+path+action) + content;
+							Sass.compile(content, function(result) {
+								try {
+									if (result.status) {
+										throw new GollumJS.Exception(result.message);
+									} else {
+										compiled.css[file] = result.text;
+										step();
+									}
+								} catch (e) {
+									console.error('Error on compile component CSS:', actionPath+'/'+file, e);
+									step();
+								}
+							});
+						})
+							.then(function () {
+
+								writeCompiledJS(actionPath + '/compiled.js', compiled);
+
+								for (var f in compiled.css) {
+									if (compiled.css[f]) {
+										compiled.css[f] = uglifycss.processString(
+											compiled.css[f],
+											{ maxLineLen: 500, expandVars: true }
+										);
+									}
+								}
+
+								for (var f in compiled.js) {
+									if (compiled.js[f]) {
+										compiled.js[f] = uglifyjs.minify(
+											compiled.js[f],
+											{ fromString: true }
+										).code;
+									}
+								}
+
+								writeCompiledJS(actionPath + '/compiled.min.js', compiled);
+
+							})
+							.catch(console.error)
+						;
+
+					}
+					
 				});
-				
 			}
 			
 		} catch (e) {
