@@ -11,6 +11,7 @@ GollumJS.NS(GollumJS.Component, function() {
 		name     : null,
 		options  : null,
 		rendered : false,
+		attached : false,
 		
 		initialize: function (component, dom) {
 			this.component = component;

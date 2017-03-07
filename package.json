@@ -20,22 +20,25 @@
     "index.js"
   ],
   "dependencies": {
-    "gollumjs-ajax": "^0.2.0",
-    "gollumjs": "^0.2.0",
     "ejs": "^2.4.1",
-    "jquery": "^2.2.3",
+    "gollumjs": "^0.3.0",
+    "gollumjs-ajax": "^0.2.0",
+    "jquery": "^3.1.1",
     "json3": "^3.3.2",
-    "sass.js": "^0.9.10",
-    "urijs": "^1.18.0",
-    "webcomponents.js": "^0.7.22"
+    "sass.js": "^0.10.3",
+    "urijs": "^1.18.8",
+    "vue": "^2.2.1",
+    "webcomponents.js": "^0.7.24"
   },
   "devDependencies": {
+    "glob": "^7.0",
+    "http-server": "^0.9.0",
     "uglifycss": "0.0.20",
-    "uglifyjs": "^2.4.10",
-    "glob": "^7.0"
+    "uglifyjs": "^2.4.10"
   },
   "scripts": {
     "clean": "rm -rf ./build/*;",
-    "build": "npm run clean; node bin/build.js;"
+    "build": "npm run clean; node bin/build.js;",
+    "start": "node node_modules/http-server/bin/http-server -p 9090"
   }
 }

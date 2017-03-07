@@ -1,0 +1,11 @@
+<{
+	"css": "data-binding.scss",
+	"js": "DataBinding.js",
+	"class": "App.ComponentElement.Main.DataBinding"
+}>
+<h3>Incremet by second: <%= element.value %></h3>
+<gjs-component name="hello1" src="main:hello" ></gjs-component>
+<gjs-component name="content" src="main:content" >
+	<h2>Hello content</h2>
+	<gjs-component name="hello1" src="main:hello" opt-value="Content Child" ></gjs-component>
+</gjs-component>

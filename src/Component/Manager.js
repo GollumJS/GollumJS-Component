@@ -62,14 +62,16 @@ GollumJS.NS(GollumJS.Component, function() {
 			
 			console.log('Start component manager');
 			
-			this.dom = $(document.body);
+			this.dom = jQuery(document.body);
 			instance = this;
 
 			for (var i = 0; i < startResolves.length; i++) {
 				startResolves[i](this);
 			}
 			delete startResolves;
-			$(window).trigger('gjs-component-start', [ this ]);
+			jQuery(window).trigger('gjs-component-start', [ this ]);
+
+			var _this = this;
 		},
 		
 		registerHtmlTag: function(htmlTag) {
@@ -95,6 +97,19 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		getParentElement: function () {
 			return this;
+		},
+
+		getAllElements: function() {
+			var rtn = [];
+			getAllChild = function(el) {
+				var childs = el.getChilds();
+				for(var i in childs) {
+					getAllChild(childs[i]);
+					rtn.push(childs[i]);
+				}
+			};
+			getAllChild(this);
+			return rtn;
 		}
 
 	});

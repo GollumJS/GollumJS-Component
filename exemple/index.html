@@ -1,36 +1,52 @@
 <html lang="fr" >
 	<head>
-		<title>Picross</title>
+		<title>EXemple GollumJS Component</title>
 		<meta charset="UTF-8" />
 	</head>
 	<body>
-		
+
 		<gjs-preload-component><!--
 			main:hello
 			main:preload
 		--></gjs-preload-component>
 		
- 		<gjs-component name="style" src="main:style" ></gjs-component>
+		<!-- Demo load style -->
+		<gjs-component name="style" src="main:style" ></gjs-component>
 		
+		<h1>Demo Hello word</h1>
 		<gjs-component name="hello1" src="main:hello" ></gjs-component>
+		
+		<h1>Demo Override option</h1>
 		<gjs-component name="hello2" src="main:hello" opt-value="Damien" ></gjs-component>
+		
+		
+		<h1>Demo Parent component</h1>
 		<gjs-component name="parent" src="main:parent" ></gjs-component> 
+		
+
+		<h1>Demo Original content</h1>
 		<gjs-component name="content" src="main:content" >
 			<h2>Hello content</h2>
 			<gjs-component name="hello1" src="main:hello" opt-value="Content Child" ></gjs-component>
 		</gjs-component>
-		
+
+	
+		<h1>Demo Data Binding</h1>
+		<gjs-component name="data-binding" src="main:data-binding" ></gjs-component>
+
+		<h1>Demo layer loader</h1>		
 		<gjs-controller home="my-action" >
 			Loading
 		</gjs-controller>
-		
+
 		<script src="../node_modules/webcomponents.js/CustomElements.js" ></script>
-		<script src="../node_modules/gollumjs/node_modules/rsvp/dist/rsvp.js" ></script>
+		<script src="../node_modules/rsvp/dist/rsvp.js" ></script>
 		<script src="../node_modules/jquery/dist/jquery.js" ></script>
 		<script src="../node_modules/json3/lib/json3.js" ></script>
 		<script src="../node_modules/sass.js/dist/sass.js" ></script>
 		<script src="../node_modules/ejs/ejs.js" ></script>
 		<script src="../node_modules/urijs/src/URI.js" ></script>
+		<script src="../node_modules/diff-match-patch/index.js" ></script>
 
 		<script src="../node_modules/gollumjs/build/gollumjs.js" ></script>
 		<script src="../node_modules/gollumjs-ajax/build/gollumjs-ajax.js" ></script>

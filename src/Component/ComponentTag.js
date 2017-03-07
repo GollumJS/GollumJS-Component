@@ -12,6 +12,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				}
 				manager.eventBinder.bindElement(element);
 				element.onAttached();
+				element.attached = true;
 				element.dom.trigger('gjs-attach', [ element ]);
 			})
 		;
@@ -23,6 +24,7 @@ GollumJS.NS(GollumJS.Component, function() {
 
 		if (element && element.rendered) {
 			manager.renderer.clean(element);
+			element.attached = false;
 			element.dom.trigger('gjs-detach', [ element ]);
 		}
 	};

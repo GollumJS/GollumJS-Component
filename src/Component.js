@@ -108,6 +108,9 @@ GollumJS.NS(GollumJS, function() {
 			;
 		},
 
+		/**
+		 * Create an element object from dom object
+		 */ 
 		createElement: function(dom) {
 			
 			var element = null

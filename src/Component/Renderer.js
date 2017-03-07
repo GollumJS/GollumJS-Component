@@ -2,11 +2,14 @@ GollumJS.NS(GollumJS.Component, function() {
 	
 	var Promise = GollumJS.Promise;
 	
+	/**
+	 * Class renderer for GJS element 
+	 */
 	this.Renderer = new GollumJS.Class({
 		
 		_lock: false,
 		_lockedElements: [],
-		
+
 		render: function(element) {
 			
 			var _this = this;
@@ -18,13 +21,11 @@ GollumJS.NS(GollumJS.Component, function() {
 						return element.dom[0].originalContent;
 					}
 				};
-				
+
 				var html = element.component.infos.template(data)
 					.replace(new RegExp('>\\s+<', 'g'), '><')
 				;
-				var inner = $.parseHTML(html);
-				_this.clean(element);
-				element.dom.append(inner);
+				element.dom.html(html);
 			};
 			
 			if (this._lock) {
@@ -38,6 +39,7 @@ GollumJS.NS(GollumJS.Component, function() {
 			}
 
 			render();
+
 			return Promise.resolve(element);
 			
 		},

@@ -14,7 +14,7 @@ GollumJS.NS(GollumJS.Component, function() {
 				var callbacks  = events[i][2];
 				var fullSearch = events[i][3];
 
-				selectors = Array.isArray(selectors)  ? selectors : [selectors];
+				selectors = Array.isArray(selectors) ? selectors : [selectors];
 				types     = Array.isArray(types)     ? types     : [types];
 				callbacks = Array.isArray(callbacks) ? callbacks : [callbacks];
 				
@@ -22,12 +22,12 @@ GollumJS.NS(GollumJS.Component, function() {
 					for (var k = 0; k < selectors.length; k++) {
 						(function(selector, type, callbacks) {
 
-							var source = fullSearch ? $(document) : element.dom;
+							var source = fullSearch ? jQuery(document) : element.dom;
 							var callbacksExec = function(e) {
 								try {
 									for (var l = 0; l < callbacks.length; l++) {
 										try {
-											callbacks[l].call(element, e, $(this), type, selector);
+											callbacks[l].call(element, e, jQuery(this), type, selector);
 										} catch(e) {
 											console.error(e);
 										}
